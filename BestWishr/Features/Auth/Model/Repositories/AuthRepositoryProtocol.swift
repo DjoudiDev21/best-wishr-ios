@@ -1,8 +1,5 @@
-//
-//  AuthRepositoryProtocol.swift
-//  BestWishr
-//
-//  Created by Abdelkrim Djoudi on 27/10/2025.
-//
-
 import Foundation
+
+protocol AuthRepositoryProtocol {
+    func login(email: String, password: String) async throws -> User
+}

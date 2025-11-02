@@ -1,8 +1,7 @@
-//
-//  User.swift
-//  BestWishr
-//
-//  Created by Abdelkrim Djoudi on 26/10/2025.
-//
-
 import Foundation
+
+struct User: Identifiable, Codable, Equatable {
+    let id: String
+    let email: String
+    let token: String
+}

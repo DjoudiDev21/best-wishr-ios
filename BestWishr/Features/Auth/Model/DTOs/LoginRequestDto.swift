@@ -1,8 +1,6 @@
-//
-//  LoginRequest.swift
-//  BestWishr
-//
-//  Created by Abdelkrim Djoudi on 26/10/2025.
-//
-
 import Foundation
+
+struct LoginRequestDto: Encodable {
+    let email: String
+    let password: String
+}

@@ -5,6 +5,7 @@ import Combine
 final class AppStore: ObservableObject {
     @Published var authStore: AuthStore
     @Published var contactsStore: ContactsStore
+    @Published var eventsStore: EventsStore
     @Published var isAuthenticated: Bool = false
     private var cancellables = Set<AnyCancellable>()
 
@@ -33,8 +34,21 @@ final class AppStore: ObservableObject {
             )
             self.contactsStore = ContactsStore(presenter: contactsPresenter)
             
+            // Initialize eventsStore
+            let eventsRepository = Self.createEventsRepository()
+            let getEventsUseCase = GetEventsUseCase(repository: eventsRepository)
+            let createEventUseCase = CreateEventUseCase(repository: eventsRepository)
+            let deleteEventUseCase = DeleteEventUseCase(repository: eventsRepository)
+            let eventsPresenter = EventsPresenter(
+                getEventsUseCase: getEventsUseCase,
+                createEventUseCase: createEventUseCase,
+                deleteEventUseCase: deleteEventUseCase
+            )
+            self.eventsStore = EventsStore(presenter: eventsPresenter)
+            
             observeAuthChanges()
             observeContactsChanges()
+            observeEventsChanges()
         }
         
         private static func createAuthRepository() -> AuthRepositoryProtocol {
@@ -57,6 +71,16 @@ final class AppStore: ObservableObject {
             return MockContactRepository()
             #endif
         }
+        
+        private static func createEventsRepository() -> EventRepositoryProtocol {
+            #if DEBUG
+            // Use mock repository in debug/development
+            return MockEventRepository()
+            #else
+            // Use real HTTP repository in production (TODO: implement when API is ready)
+            return MockEventRepository()
+            #endif
+        }
 
         private func observeAuthChanges() {
             authStore.$isAuthenticated
@@ -73,6 +97,15 @@ final class AppStore: ObservableObject {
         private func observeContactsChanges() {
             // Forward contactsStore changes to trigger AppStore UI updates
             contactsStore.objectWillChange
+                .sink { [weak self] _ in
+                    self?.objectWillChange.send()
+                }
+                .store(in: &cancellables)
+        }
+        
+        private func observeEventsChanges() {
+            // Forward eventsStore changes to trigger AppStore UI updates
+            eventsStore.objectWillChange
                 .sink { [weak self] _ in
                     self?.objectWillChange.send()
                 }

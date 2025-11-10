@@ -16,7 +16,7 @@ final class AuthViewModel: ObservableObject {
     private func setupBindings() {
          // Exemple : validation simple
          $email.combineLatest($password)
-             .map { !$0.isEmpty && !$1.isEmpty }
+             .map { $0.isEmpty || $1.isEmpty }
              .assign(to: &$isButtonDisabled)
      }
     

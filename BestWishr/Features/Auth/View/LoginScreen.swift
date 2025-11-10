@@ -4,6 +4,7 @@ struct LoginScreen: View {
     @ObservedObject var viewModel: AuthViewModel
     @ObservedObject var store: AuthStore
     @State private var showRegister = false
+    @State private var showForgotPassword = false
     @State private var isAnimating = false
     @State private var showFloatingIcons = false
     
@@ -32,7 +33,8 @@ struct LoginScreen: View {
                     LoginForm(
                         viewModel: viewModel,
                         store: store,
-                        onSignUpTap: { showRegister = true }
+                        onSignUpTap: { showRegister = true },
+                        onForgotPasswordTap: { showForgotPassword = true }
                     )
                 }
                 .padding(.horizontal, 20)
@@ -41,6 +43,9 @@ struct LoginScreen: View {
         }
         .sheet(isPresented: $showRegister) {
             RegisterScreen()
+        }
+        .sheet(isPresented: $showForgotPassword) {
+            ForgotPasswordScreen()
         }
         .onAppear {
             withAnimation(.easeInOut(duration: 1)) {

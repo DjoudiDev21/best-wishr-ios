@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct PrimaryButton: View {
+struct SubmitButton: View {
     let title: String
     let action: () -> Void
     var isLoading: Bool = false
@@ -41,18 +41,18 @@ struct PrimaryButton: View {
 
 #Preview {
     VStack(spacing: 20) {
-        PrimaryButton(
+        SubmitButton(
             title: "Sign In",
             action: { print("Sign In tapped") }
         )
         
-        PrimaryButton(
+        SubmitButton(
             title: "Loading...",
             action: { },
             isLoading: true
         )
         
-        PrimaryButton(
+        SubmitButton(
             title: "Disabled",
             action: { },
             isDisabled: true

@@ -4,6 +4,7 @@ struct LoginForm: View {
     @ObservedObject var viewModel: AuthViewModel
     @ObservedObject var store: AuthStore
     let onSignUpTap: () -> Void
+    let onForgotPasswordTap: () -> Void
     
     var body: some View {
         VStack(spacing: 16) {
@@ -34,13 +35,11 @@ struct LoginForm: View {
                     isSecure: true,
                     trailingButton: FormFieldTrailingButton(
                         title: "Forgot?",
-                        action: {
-                            // TODO: Implement forgot password
-                        }
+                        action: onForgotPasswordTap
                     )
                 )
                 
-                PrimaryButton(
+                SubmitButton(
                     title: "Sign In",
                     action: {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {

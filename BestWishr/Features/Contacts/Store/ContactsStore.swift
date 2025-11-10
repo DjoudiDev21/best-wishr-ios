@@ -55,7 +55,6 @@ final class ContactsStore: ObservableObject {
     
     // MARK: - Actions
     func loadContacts() async {
-        print("📡 Setting isLoading = true")
         isLoading = true
         error = nil
         
@@ -64,14 +63,11 @@ final class ContactsStore: ObservableObject {
         switch result {
         case .success(let loadedContacts):
             contacts = loadedContacts
-            print("📡 Loaded \(loadedContacts.count) contacts")
         case .failure(let loadError):
             error = loadError
             errorHandler.handle(loadError)
-            print("📡 Error loading contacts: \(loadError)")
         }
         
-        print("📡 Setting isLoading = false")
         isLoading = false
     }
     

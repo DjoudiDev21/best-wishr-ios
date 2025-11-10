@@ -110,31 +110,7 @@ struct EventsScreen: View {
             }
         }
         .sheet(isPresented: $showingAddEvent) {
-            // Add event sheet (placeholder for now)
-            NavigationView {
-                VStack {
-                    Text("Add Event")
-                        .font(.largeTitle)
-                        .padding()
-                    
-                    Text("Event creation form will be implemented here")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .padding()
-                    
-                    Spacer()
-                }
-                .navigationTitle("Add Event")
-                .navigationBarTitleDisplayMode(.inline)
-                .navigationBarItems(
-                    leading: Button("Cancel") {
-                        showingAddEvent = false
-                    },
-                    trailing: Button("Save") {
-                        showingAddEvent = false
-                    }
-                )
-            }
+            AddEventScreen()
         }
     }
 }

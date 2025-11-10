@@ -74,23 +74,38 @@ struct Event: Identifiable, Codable, Hashable {
 
 // MARK: - Event Creation Data
 struct EventCreationData {
-    let title: String
-    let description: String?
-    let eventType: EventType
-    let contactId: String?
-    let date: Date
-    let recurrence: RecurrenceRule?
-    let reminders: [EventReminder]
+    var title: String = ""
+    var description: String = ""
+    var eventType: EventType = .birthday
+    var contactId: String? = nil
+    var date: Date = Date()
+    var isRecurring: Bool = false
+    var hasReminders: Bool = true
+    
+    var isValid: Bool {
+        !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
     
     func toEvent() -> Event {
-        Event(
-            title: title,
-            description: description,
+        let recurrence = isRecurring ? RecurrenceRule(frequency: .yearly) : nil
+        let reminders = hasReminders ? eventType.defaultReminders : []
+        
+        return Event(
+            title: title.trimmingCharacters(in: .whitespacesAndNewlines),
+            description: description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : description.trimmingCharacters(in: .whitespacesAndNewlines),
             eventType: eventType,
             contactId: contactId,
             date: date,
             recurrence: recurrence,
-            reminders: reminders
+            reminders: reminders as! [EventReminder]
         )
+    }
+}
+
+extension EventCreationData {
+    init(title: String, eventType: EventType, contactId: String? = nil) {
+        self.title = title
+        self.eventType = eventType
+        self.contactId = contactId
     }
 }

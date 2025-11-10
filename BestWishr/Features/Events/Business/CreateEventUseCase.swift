@@ -37,7 +37,7 @@ struct CreateEventUseCase {
         }
         
         // Validate description length
-        if let description = eventData.description, description.count > 500 {
+        if !eventData.description.isEmpty && eventData.description.count > 500 {
             return .failure(EventError.invalidData("Event description cannot exceed 500 characters"))
         }
         
@@ -48,7 +48,8 @@ struct CreateEventUseCase {
         }
         
         // Validate recurrence rule
-        if let recurrence = eventData.recurrence {
+        if eventData.isRecurring {
+            let recurrence = RecurrenceRule(frequency: .yearly)
             let validationResult = validateRecurrence(recurrence, eventDate: eventData.date)
             if case .failure(let error) = validationResult {
                 return .failure(error)
@@ -56,9 +57,13 @@ struct CreateEventUseCase {
         }
         
         // Validate reminders
-        let reminderValidation = validateReminders(eventData.reminders, eventDate: eventData.date)
-        if case .failure(let error) = reminderValidation {
-            return .failure(error)
+        if eventData.hasReminders {
+            let reminderIntervals = eventData.eventType.defaultReminders
+            let reminders = reminderIntervals.map { EventReminder(interval: $0) }
+            let reminderValidation = validateReminders(reminders, eventDate: eventData.date)
+            if case .failure(let error) = reminderValidation {
+                return .failure(error)
+            }
         }
         
         return .success(())

@@ -35,6 +35,37 @@ final class AuthStore: ObservableObject {
         isLoading = false
     }
     
+    func register(email: String, password: String, firstName: String, lastName: String) async {
+        isLoading = true
+
+        let result = await presenter.performRegister(email: email, password: password, firstName: firstName, lastName: lastName)
+
+        switch result {
+        case .success(let user):
+            handleLoginSuccess(user) // Registration also logs the user in
+        case .failure(let error):
+            handleLoginFailure(error)
+        }
+
+        isLoading = false
+    }
+    
+    func forgotPassword(email: String) async {
+        isLoading = true
+
+        let result = await presenter.performForgotPassword(email: email)
+
+        switch result {
+        case .success:
+            // Handle forgot password success (could show a success message)
+            break
+        case .failure(let error):
+            errorHandler.handle(error)
+        }
+
+        isLoading = false
+    }
+    
     // MARK: - Private Helpers
     private func handleLoginSuccess(_ user: User) {
         self.user = user

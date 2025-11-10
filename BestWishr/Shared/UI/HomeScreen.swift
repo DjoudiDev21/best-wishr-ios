@@ -11,13 +11,19 @@ struct HomeScreen: View {
                     Text("Home")
                 }
             
+            ContactsScreen()
+                .tabItem {
+                    Image(systemName: "person.2.fill")
+                    Text("Contacts")
+                }
+            
             SettingsTabView()
                 .tabItem {
                     Image(systemName: "gearshape.fill")
                     Text("Settings")
                 }
         }
-        .accentColor(.blue)
+        .accentColor(Color(red: 0.65, green: 0.3, blue: 0.8))
     }
 }
 
@@ -28,22 +34,40 @@ struct HomeTabView: View {
         NavigationView {
             VStack(spacing: 20) {
                 Text("Welcome to BestWishr!")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [
+                                Color(red: 0.65, green: 0.3, blue: 0.8),
+                                Color(red: 0.75, green: 0.4, blue: 0.9)
+                            ],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
                     .multilineTextAlignment(.center)
                 
                 if let user = appStore.authStore.user {
                     VStack(spacing: 8) {
                         Text("Hello, \(user.firstName ?? "User")!")
-                            .font(.title2)
-                            .fontWeight(.medium)
+                            .font(.system(size: 18, weight: .medium, design: .rounded))
+                            .foregroundColor(Color(red: 0.45, green: 0.3, blue: 0.6))
                         
                         Text(user.email)
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
+                            .font(.system(size: 14, weight: .regular, design: .rounded))
+                            .foregroundColor(Color(red: 0.5, green: 0.4, blue: 0.6))
                     }
-                    .padding()
-                    .background(Color.blue.opacity(0.1))
+                    .padding(16)
+                    .background(
+                        LinearGradient(
+                            colors: [
+                                Color(red: 0.65, green: 0.3, blue: 0.8).opacity(0.1),
+                                Color(red: 0.75, green: 0.4, blue: 0.9).opacity(0.05)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
                     .cornerRadius(12)
                 }
                 
@@ -64,23 +88,31 @@ struct SettingsTabView: View {
                 if let user = appStore.authStore.user {
                     VStack(spacing: 12) {
                         Circle()
-                            .fill(Color.blue.gradient)
+                            .fill(
+                                LinearGradient(
+                                    colors: [
+                                        Color(red: 0.65, green: 0.3, blue: 0.8),
+                                        Color(red: 0.75, green: 0.4, blue: 0.9)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
                             .frame(width: 80, height: 80)
                             .overlay(
                                 Text("\(user.firstName?.prefix(1) ?? "U")\(user.lastName?.prefix(1) ?? "U")")
-                                    .font(.title)
-                                    .fontWeight(.bold)
+                                    .font(.system(size: 24, weight: .bold, design: .rounded))
                                     .foregroundColor(.white)
                             )
                         
                         VStack(spacing: 4) {
                             Text("\(user.firstName ?? "User") \(user.lastName ?? "")")
-                                .font(.title2)
-                                .fontWeight(.semibold)
+                                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                .foregroundColor(Color(red: 0.45, green: 0.3, blue: 0.6))
                             
                             Text(user.email)
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
+                                .font(.system(size: 14, weight: .regular, design: .rounded))
+                                .foregroundColor(Color(red: 0.5, green: 0.4, blue: 0.6))
                         }
                     }
                     .padding()
@@ -147,27 +179,37 @@ struct SettingsRow: View {
     var body: some View {
         HStack(spacing: 16) {
             Image(systemName: icon)
-                .font(.title3)
-                .foregroundColor(.blue)
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(Color(red: 0.65, green: 0.3, blue: 0.8))
                 .frame(width: 24)
             
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(.headline)
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .foregroundColor(Color(red: 0.45, green: 0.3, blue: 0.6))
                 
                 Text(subtitle)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                    .font(.system(size: 12, weight: .regular, design: .rounded))
+                    .foregroundColor(Color(red: 0.5, green: 0.4, blue: 0.6))
             }
             
             Spacer()
             
             Image(systemName: "chevron.right")
-                .font(.caption)
-                .foregroundColor(.secondary)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(Color(red: 0.5, green: 0.4, blue: 0.6))
         }
         .padding()
-        .background(Color.gray.opacity(0.05))
+        .background(
+            LinearGradient(
+                colors: [
+                    Color(red: 0.65, green: 0.3, blue: 0.8).opacity(0.05),
+                    Color(red: 0.75, green: 0.4, blue: 0.9).opacity(0.02)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
         .cornerRadius(12)
     }
 }

@@ -4,6 +4,7 @@ import Combine
 @MainActor
 final class AppStore: ObservableObject {
     @Published var authStore: AuthStore
+    @Published var contactsStore: ContactsStore
     @Published var isAuthenticated: Bool = false
     private var cancellables = Set<AnyCancellable>()
 
@@ -20,6 +21,18 @@ final class AppStore: ObservableObject {
             )
             self.authStore = AuthStore(presenter: authPresenter)
             
+            // Initialize contactsStore
+            let contactsRepository = Self.createContactsRepository()
+            let getContactsUseCase = GetContactsUseCase(repository: contactsRepository)
+            let createContactUseCase = CreateContactUseCase(repository: contactsRepository)
+            let deleteContactUseCase = DeleteContactUseCase(repository: contactsRepository)
+            let contactsPresenter = ContactsPresenter(
+                getContactsUseCase: getContactsUseCase,
+                createContactUseCase: createContactUseCase,
+                deleteContactUseCase: deleteContactUseCase
+            )
+            self.contactsStore = ContactsStore(presenter: contactsPresenter)
+            
             observeAuthChanges()
         }
         
@@ -31,6 +44,16 @@ final class AppStore: ObservableObject {
             // Use real HTTP repository in production
             let httpClient = HttpClient(baseURL: URL(string: "https://api.example.com")!)
             return HttpAuthRepository(httpClient: httpClient)
+            #endif
+        }
+        
+        private static func createContactsRepository() -> ContactRepositoryProtocol {
+            #if DEBUG
+            // Use mock repository in debug/development
+            return MockContactRepository()
+            #else
+            // Use real HTTP repository in production (TODO: implement when API is ready)
+            return MockContactRepository()
             #endif
         }
 

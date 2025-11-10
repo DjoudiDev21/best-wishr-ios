@@ -4,11 +4,8 @@ import Combine
 @MainActor
 final class AppStore: ObservableObject {
     @Published var authStore: AuthStore
+    @Published var isAuthenticated: Bool = false
     private var cancellables = Set<AnyCancellable>()
-
-    var isAuthenticated: Bool {
-            authStore.isAuthenticated
-        }
 
         init() {
             // Initialize authStore with environment-based repository
@@ -39,8 +36,8 @@ final class AppStore: ObservableObject {
 
         private func observeAuthChanges() {
             authStore.$isAuthenticated
-                .dropFirst()
-                .sink { authenticated in
+                .sink { [weak self] authenticated in
+                    self?.isAuthenticated = authenticated
                     if !authenticated {
                         // Exemple : reset d'autres stores
                         // self?.contactsStore.reset()

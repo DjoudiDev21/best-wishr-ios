@@ -66,6 +66,11 @@ final class AuthStore: ObservableObject {
         isLoading = false
     }
     
+    func logout() {
+        user = nil
+        isAuthenticated = false
+    }
+    
     // MARK: - Private Helpers
     private func handleLoginSuccess(_ user: User) {
         self.user = user

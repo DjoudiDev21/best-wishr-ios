@@ -1,6 +1,6 @@
 import Foundation
 
-struct LoginResponseDto: Decodable {
+struct RegisterResponseDto: Decodable {
     let id: String
     let email: String
     let token: String

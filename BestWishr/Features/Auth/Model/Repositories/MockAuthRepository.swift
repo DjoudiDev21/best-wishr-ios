@@ -2,10 +2,10 @@ import Foundation
 
 final class MockAuthRepository: AuthRepositoryProtocol {
     
-    private let mockUsers: [String: String] = [
-        "user@example.com": "password123",
-        "admin@example.com": "admin123",
-        "test@test.com": "test123"
+    private let mockUsers: [String: (password: String, firstName: String, lastName: String)] = [
+        "user@example.com": ("password123", "John", "Doe"),
+        "admin@example.com": ("admin123", "Admin", "User"),
+        "test@test.com": ("test123", "Test", "Account")
     ]
     
     func login(email: String, password: String) async throws -> User {
@@ -23,8 +23,8 @@ final class MockAuthRepository: AuthRepositoryProtocol {
         }
         
         // Check if user exists and password is correct
-        guard let storedPassword = mockUsers[email.lowercased()],
-              storedPassword == password else {
+        guard let userData = mockUsers[email.lowercased()],
+              userData.password == password else {
             throw AuthError.invalidCredentials
         }
         
@@ -32,7 +32,9 @@ final class MockAuthRepository: AuthRepositoryProtocol {
         return User(
             id: UUID().uuidString,
             email: email.lowercased(),
-            token: "mock_token_\(UUID().uuidString)"
+            token: "mock_token_\(UUID().uuidString)",
+            firstName: userData.firstName,
+            lastName: userData.lastName
         )
     }
     
@@ -65,7 +67,9 @@ final class MockAuthRepository: AuthRepositoryProtocol {
         return User(
             id: UUID().uuidString,
             email: email.lowercased(),
-            token: "mock_token_\(UUID().uuidString)"
+            token: "mock_token_\(UUID().uuidString)",
+            firstName: firstName.trimmingCharacters(in: .whitespaces),
+            lastName: lastName.trimmingCharacters(in: .whitespaces)
         )
     }
     

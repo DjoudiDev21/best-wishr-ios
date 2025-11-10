@@ -10,7 +10,7 @@ final class HttpAuthRepository: AuthRepositoryProtocol {
     func login(email: String, password: String) async throws -> User {
         let body = LoginRequestDto(email: email, password: password)
         let response: LoginResponseDto = try await httpClient.post(.authLogin, body: body)
-        return User(id: response.id, email: response.email, token: response.token)
+        return User(id: response.id, email: response.email, token: response.token, firstName: response.firstName, lastName: response.lastName)
     }
     
     func register(email: String, password: String, firstName: String, lastName: String) async throws -> User {

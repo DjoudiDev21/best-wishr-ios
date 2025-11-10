@@ -2,6 +2,8 @@ import SwiftUI
 
 struct RegisterScreen: View {
     @Environment(\.dismiss) private var dismiss
+    @State private var firstName = ""
+    @State private var lastName = ""
     @State private var email = ""
     @State private var password = ""
     @State private var confirmPassword = ""
@@ -73,6 +75,20 @@ struct RegisterScreen: View {
                                         endPoint: .trailing
                                     )
                                 )
+                            
+                            HStack(spacing: 12) {
+                                FormFieldView(
+                                    title: "First Name",
+                                    placeholder: "John",
+                                    text: $firstName
+                                )
+                                
+                                FormFieldView(
+                                    title: "Last Name",
+                                    placeholder: "Doe",
+                                    text: $lastName
+                                )
+                            }
                             
                             FormFieldView(
                                 title: "Email",

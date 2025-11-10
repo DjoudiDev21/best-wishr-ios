@@ -29,7 +29,7 @@ struct LoginScreen: View {
                 .frame(maxHeight: 200)
                 
                 VStack(spacing: 0) {
-                    LoginCard(
+                    LoginForm(
                         viewModel: viewModel,
                         store: store,
                         onSignUpTap: { showRegister = true }

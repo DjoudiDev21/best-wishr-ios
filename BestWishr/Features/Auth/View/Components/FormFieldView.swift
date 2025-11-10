@@ -12,7 +12,7 @@ struct FormFieldView: View {
             HStack {
                 Text(title)
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(Color(red: 0.15, green: 0.1, blue: 0.2))
+                    .foregroundColor(Color(red: 0.45, green: 0.3, blue: 0.6))
                 
                 Spacer()
                 

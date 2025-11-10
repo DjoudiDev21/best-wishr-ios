@@ -2,8 +2,8 @@ import Foundation
 import Combine
 
 final class AuthViewModel: ObservableObject {
-    @Published var email = ""
-    @Published var password = ""
+    @Published var email = "user@example.com"  // Default for easy testing
+    @Published var password = "password123"    // Default for easy testing
     @Published var isButtonDisabled = true
     
     private let store: AuthStore

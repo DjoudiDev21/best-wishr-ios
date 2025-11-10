@@ -34,6 +34,7 @@ final class AppStore: ObservableObject {
             self.contactsStore = ContactsStore(presenter: contactsPresenter)
             
             observeAuthChanges()
+            observeContactsChanges()
         }
         
         private static func createAuthRepository() -> AuthRepositoryProtocol {
@@ -65,6 +66,15 @@ final class AppStore: ObservableObject {
                         // Exemple : reset d'autres stores
                         // self?.contactsStore.reset()
                     }
+                }
+                .store(in: &cancellables)
+        }
+        
+        private func observeContactsChanges() {
+            // Forward contactsStore changes to trigger AppStore UI updates
+            contactsStore.objectWillChange
+                .sink { [weak self] _ in
+                    self?.objectWillChange.send()
                 }
                 .store(in: &cancellables)
         }

@@ -68,6 +68,7 @@ struct ContactsScreen: View {
                             .foregroundColor(Color(red: 0.5, green: 0.4, blue: 0.6))
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .onAppear { print("🎯 UI: Showing loading state - isLoading: \(appStore.contactsStore.isLoading)") }
                 } else if appStore.contactsStore.filteredContacts.isEmpty {
                     EmptyStateView(
                         icon: appStore.contactsStore.searchText.isEmpty && appStore.contactsStore.selectedCategory == nil ? "person.3" : "magnifyingglass",

@@ -55,30 +55,23 @@ final class ContactsStore: ObservableObject {
     
     // MARK: - Actions
     func loadContacts() async {
+        print("📡 Setting isLoading = true")
         isLoading = true
         error = nil
         
-        let filters: ContactFilters? = {
-            if !searchText.isEmpty || selectedCategory != nil {
-                return ContactFilters(
-                    searchText: searchText.isEmpty ? nil : searchText,
-                    category: selectedCategory,
-                    hasUpcomingEvents: nil
-                )
-            }
-            return nil
-        }()
-        
-        let result = await presenter.loadContacts(filters: filters, sortBy: sortBy)
+        let result = await presenter.loadContacts(filters: nil, sortBy: sortBy)
         
         switch result {
         case .success(let loadedContacts):
             contacts = loadedContacts
+            print("📡 Loaded \(loadedContacts.count) contacts")
         case .failure(let loadError):
             error = loadError
             errorHandler.handle(loadError)
+            print("📡 Error loading contacts: \(loadError)")
         }
         
+        print("📡 Setting isLoading = false")
         isLoading = false
     }
     
@@ -136,29 +129,7 @@ final class ContactsStore: ObservableObject {
     
     // MARK: - Private Methods
     private func setupSearchDebouncing() {
-        // Debounce search to avoid too many API calls
-        $searchText
-            .debounce(for: .milliseconds(300), scheduler: RunLoop.main)
-            .removeDuplicates()
-            .sink { [weak self] _ in
-                Task { @MainActor in
-                    await self?.loadContacts()
-                }
-            }
-            .store(in: &cancellables)
-        
-        // React to category changes
-        $selectedCategory
-            .dropFirst()
-            .removeDuplicates()
-            .sink { [weak self] _ in
-                Task { @MainActor in
-                    await self?.loadContacts()
-                }
-            }
-            .store(in: &cancellables)
-        
-        // React to sort changes
+        // React to sort changes only - search and category are handled by computed property
         $sortBy
             .dropFirst()
             .removeDuplicates()

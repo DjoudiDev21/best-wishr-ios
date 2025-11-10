@@ -10,7 +10,7 @@ final class MockContactRepository: ContactRepositoryProtocol {
     
     func getContacts() async throws -> [Contact] {
         // Simulate network delay
-        try await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
+        try await Task.sleep(nanoseconds: 1_500_000_000) // 1.5 seconds
         return contacts.sorted { $0.firstName < $1.firstName }
     }
     

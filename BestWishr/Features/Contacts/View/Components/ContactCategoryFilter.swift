@@ -53,50 +53,50 @@ struct FilterChip: View {
     }
     
     var body: some View {
-        Button(action: onTap) {
-            HStack(spacing: 6) {
-                if let icon = icon {
-                    Image(systemName: icon)
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(isSelected ? .white : color)
-                }
-                
-                Text(title)
-                    .font(.system(size: 14, weight: .medium, design: .rounded))
+        HStack(spacing: 6) {
+            if let icon = icon {
+                Image(systemName: icon)
+                    .font(.system(size: 12, weight: .medium))
                     .foregroundColor(isSelected ? .white : color)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
-            .background(
-                Group {
-                    if isSelected {
-                        LinearGradient(
-                            colors: [color, color.opacity(0.8)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    } else {
-                        LinearGradient(
-                            colors: [
-                                color.opacity(0.08),
-                                color.opacity(0.03)
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    }
-                }
-            )
-            .cornerRadius(20)
-            .overlay(
-                RoundedRectangle(cornerRadius: 20)
-                    .stroke(
-                        isSelected ? Color.clear : color.opacity(0.3),
-                        lineWidth: 1
-                    )
-            )
+            
+            Text(title)
+                .font(.system(size: 14, weight: .medium, design: .rounded))
+                .foregroundColor(isSelected ? .white : color)
         }
-        .buttonStyle(PlainButtonStyle())
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .background(
+            Group {
+                if isSelected {
+                    LinearGradient(
+                        colors: [color, color.opacity(0.8)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                } else {
+                    LinearGradient(
+                        colors: [
+                            color.opacity(0.08),
+                            color.opacity(0.03)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                }
+            }
+        )
+        .cornerRadius(20)
+        .overlay(
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(
+                    isSelected ? Color.clear : color.opacity(0.3),
+                    lineWidth: 1
+                )
+        )
+        .onTapGesture {
+            onTap()
+        }
     }
 }
 

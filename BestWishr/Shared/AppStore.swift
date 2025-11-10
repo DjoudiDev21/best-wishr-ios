@@ -6,6 +6,7 @@ final class AppStore: ObservableObject {
     @Published var authStore: AuthStore
     @Published var contactsStore: ContactsStore
     @Published var eventsStore: EventsStore
+    @Published var giftsStore: GiftsStore
     @Published var isAuthenticated: Bool = false
     private var cancellables = Set<AnyCancellable>()
 
@@ -46,9 +47,26 @@ final class AppStore: ObservableObject {
             )
             self.eventsStore = EventsStore(presenter: eventsPresenter)
             
+            // Initialize giftsStore
+            let giftsRepository = Self.createGiftsRepository()
+            let generatePersonalizedSuggestionsUseCase = GeneratePersonalizedGiftSuggestionsUseCase(repository: giftsRepository)
+            let generateGeneralSuggestionsUseCase = GenerateGeneralGiftSuggestionsUseCase(repository: giftsRepository)
+            let saveGiftToWishlistUseCase = SaveGiftToWishlistUseCase(repository: giftsRepository)
+            let getSavedGiftsUseCase = GetSavedGiftsUseCase(repository: giftsRepository)
+            let markGiftAsPurchasedUseCase = MarkGiftAsPurchasedUseCase(repository: giftsRepository)
+            let giftsPresenter = GiftsPresenter(
+                generatePersonalizedSuggestionsUseCase: generatePersonalizedSuggestionsUseCase,
+                generateGeneralSuggestionsUseCase: generateGeneralSuggestionsUseCase,
+                saveGiftToWishlistUseCase: saveGiftToWishlistUseCase,
+                getSavedGiftsUseCase: getSavedGiftsUseCase,
+                markGiftAsPurchasedUseCase: markGiftAsPurchasedUseCase
+            )
+            self.giftsStore = GiftsStore(presenter: giftsPresenter)
+            
             observeAuthChanges()
             observeContactsChanges()
             observeEventsChanges()
+            observeGiftsChanges()
         }
         
         private static func createAuthRepository() -> AuthRepositoryProtocol {
@@ -81,6 +99,16 @@ final class AppStore: ObservableObject {
             return MockEventRepository()
             #endif
         }
+        
+        private static func createGiftsRepository() -> GiftRepository {
+            #if DEBUG
+            // Use mock repository in debug/development
+            return MockGiftRepository()
+            #else
+            // Use real HTTP repository in production (TODO: implement when API is ready)
+            return MockGiftRepository()
+            #endif
+        }
 
         private func observeAuthChanges() {
             authStore.$isAuthenticated
@@ -106,6 +134,15 @@ final class AppStore: ObservableObject {
         private func observeEventsChanges() {
             // Forward eventsStore changes to trigger AppStore UI updates
             eventsStore.objectWillChange
+                .sink { [weak self] _ in
+                    self?.objectWillChange.send()
+                }
+                .store(in: &cancellables)
+        }
+        
+        private func observeGiftsChanges() {
+            // Forward giftsStore changes to trigger AppStore UI updates
+            giftsStore.objectWillChange
                 .sink { [weak self] _ in
                     self?.objectWillChange.send()
                 }

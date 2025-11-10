@@ -4,6 +4,7 @@ struct QuickActionsView: View {
     @EnvironmentObject var appStore: AppStore
     @State private var showingAddContact = false
     @State private var showingAddEvent = false
+    @State private var showingSavedGifts = false
     
     var body: some View {
         VStack(spacing: 16) {
@@ -42,7 +43,7 @@ struct QuickActionsView: View {
                     subtitle: "Browse suggestions",
                     color: Color(red: 1.0, green: 0.6, blue: 0.0)
                 ) {
-                    // TODO: Implement gift ideas
+                    showingSavedGifts = true
                 }
                 
                 QuickActionCard(
@@ -109,6 +110,9 @@ struct QuickActionsView: View {
                     }
                 )
             }
+        }
+        .sheet(isPresented: $showingSavedGifts) {
+            SavedGiftsScreen()
         }
     }
 }

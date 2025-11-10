@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct CustomTextFieldStyle: TextFieldStyle {
-    @State private var isFocused = false
+    @FocusState private var isFocused: Bool
     
     func _body(configuration: TextField<Self._Label>) -> some View {
         configuration
@@ -25,16 +25,12 @@ struct CustomTextFieldStyle: TextFieldStyle {
             )
             .scaleEffect(isFocused ? 1.02 : 1.0)
             .animation(.easeInOut(duration: 0.2), value: isFocused)
-            .onTapGesture {
-                withAnimation {
-                    isFocused.toggle()
-                }
-            }
+            .focused($isFocused)
     }
 }
 
 struct ModernTextFieldStyle: TextFieldStyle {
-    @State private var isFocused = false
+    @FocusState private var isFocused: Bool
     
     func _body(configuration: TextField<Self._Label>) -> some View {
         configuration
@@ -57,16 +53,12 @@ struct ModernTextFieldStyle: TextFieldStyle {
                 y: 2
             )
             .animation(.easeInOut(duration: 0.2), value: isFocused)
-            .onTapGesture {
-                withAnimation {
-                    isFocused.toggle()
-                }
-            }
+            .focused($isFocused)
     }
 }
 
 struct CompactTextFieldStyle: TextFieldStyle {
-    @State private var isFocused = false
+    @FocusState private var isFocused: Bool
     
     func _body(configuration: TextField<Self._Label>) -> some View {
         configuration
@@ -89,10 +81,6 @@ struct CompactTextFieldStyle: TextFieldStyle {
                 y: 1
             )
             .animation(.easeInOut(duration: 0.2), value: isFocused)
-            .onTapGesture {
-                withAnimation {
-                    isFocused.toggle()
-                }
-            }
+            .focused($isFocused)
     }
 }

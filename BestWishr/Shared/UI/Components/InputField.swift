@@ -1,9 +1,63 @@
 import SwiftUI
+#if os(iOS)
+import UIKit
+#endif
+
+enum InputType {
+    case text
+    case email
+    case phone
+    case number
+    
+    #if os(iOS)
+    var keyboardType: UIKeyboardType {
+        switch self {
+        case .text:
+            return .default
+        case .email:
+            return .emailAddress
+        case .phone:
+            return .phonePad
+        case .number:
+            return .numberPad
+        }
+    }
+    
+    var textContentType: UITextContentType? {
+        switch self {
+        case .text:
+            return nil
+        case .email:
+            return .emailAddress
+        case .phone:
+            return .telephoneNumber
+        case .number:
+            return nil
+        }
+    }
+    #endif
+    
+    #if os(iOS)
+    var autocapitalizationType: UITextAutocapitalizationType {
+        switch self {
+        case .text:
+            return .sentences
+        case .email:
+            return .none
+        case .phone:
+            return .none
+        case .number:
+            return .none
+        }
+    }
+    #endif
+}
 
 struct InputField: View {
     let placeholder: String
     @Binding var text: String
     var isSecure: Bool = false
+    var inputType: InputType = .text
     
     var body: some View {
         Group {
@@ -11,8 +65,16 @@ struct InputField: View {
                 SecureField(placeholder, text: $text)
                     .textFieldStyle(CompactTextFieldStyle())
             } else {
+                #if os(iOS)
                 TextField(placeholder, text: $text)
                     .textFieldStyle(CompactTextFieldStyle())
+                    .keyboardType(inputType.keyboardType)
+                    .textContentType(inputType.textContentType)
+                    .autocapitalization(inputType.autocapitalizationType)
+                #else
+                TextField(placeholder, text: $text)
+                    .textFieldStyle(CompactTextFieldStyle())
+                #endif
             }
         }
     }

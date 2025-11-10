@@ -5,6 +5,7 @@ struct FormFieldView: View {
     let placeholder: String
     @Binding var text: String
     var isSecure: Bool = false
+    var inputType: InputType = .text
     var trailingButton: FormFieldTrailingButton? = nil
     
     var body: some View {
@@ -28,7 +29,8 @@ struct FormFieldView: View {
             InputField(
                 placeholder: placeholder,
                 text: $text,
-                isSecure: isSecure
+                isSecure: isSecure,
+                inputType: inputType
             )
         }
     }
@@ -44,7 +46,8 @@ struct FormFieldTrailingButton {
         FormFieldView(
             title: "Email",
             placeholder: "you@example.com",
-            text: .constant("")
+            text: .constant(""),
+            inputType: .email
         )
         
         FormFieldView(

@@ -64,7 +64,8 @@ struct ForgotPasswordScreen: View {
                             FormFieldView(
                                 title: "Email",
                                 placeholder: "you@example.com",
-                                text: $email
+                                text: $email,
+                                inputType: .email
                             )
                             
                             SubmitButton(

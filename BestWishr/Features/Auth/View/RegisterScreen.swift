@@ -2,8 +2,6 @@ import SwiftUI
 
 struct RegisterScreen: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var firstName = ""
-    @State private var lastName = ""
     @State private var email = ""
     @State private var password = ""
     @State private var confirmPassword = ""
@@ -13,8 +11,6 @@ struct RegisterScreen: View {
     @State private var showFloatingIcons = false
     
     private var isFormValid: Bool {
-        !firstName.isEmpty &&
-        !lastName.isEmpty &&
         !email.isEmpty &&
         !password.isEmpty &&
         password == confirmPassword &&
@@ -78,25 +74,11 @@ struct RegisterScreen: View {
                                     )
                                 )
                             
-                            // Name Fields Row
-                            HStack(spacing: 12) {
-                                FormFieldView(
-                                    title: "First Name",
-                                    placeholder: "John",
-                                    text: $firstName
-                                )
-                                
-                                FormFieldView(
-                                    title: "Last Name",
-                                    placeholder: "Doe",
-                                    text: $lastName
-                                )
-                            }
-                            
                             FormFieldView(
                                 title: "Email",
                                 placeholder: "you@example.com",
-                                text: $email
+                                text: $email,
+                                inputType: .email
                             )
                             
                             FormFieldView(

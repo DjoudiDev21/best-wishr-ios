@@ -25,7 +25,8 @@ struct LoginForm: View {
                 FormFieldView(
                     title: "Email",
                     placeholder: "you@example.com",
-                    text: $viewModel.email
+                    text: $viewModel.email,
+                    inputType: .email
                 )
                 
                 FormFieldView(

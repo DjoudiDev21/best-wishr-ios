@@ -38,161 +38,56 @@ struct HomeTabView: View {
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 20) {
-                Text("Welcome to BestWishr!")
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [
-                                Color(red: 0.65, green: 0.3, blue: 0.8),
-                                Color(red: 0.75, green: 0.4, blue: 0.9)
-                            ],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
-                    .multilineTextAlignment(.center)
-                
-                if let user = appStore.authStore.user {
-                    VStack(spacing: 8) {
-                        Text("Hello, \(user.firstName ?? "User")!")
-                            .font(.system(size: 18, weight: .medium, design: .rounded))
-                            .foregroundColor(Color(red: 0.45, green: 0.3, blue: 0.6))
-                        
-                        Text(user.email)
-                            .font(.system(size: 14, weight: .regular, design: .rounded))
-                            .foregroundColor(Color(red: 0.5, green: 0.4, blue: 0.6))
-                    }
-                    .padding(16)
-                    .background(
-                        LinearGradient(
-                            colors: [
-                                Color(red: 0.65, green: 0.3, blue: 0.8).opacity(0.1),
-                                Color(red: 0.75, green: 0.4, blue: 0.9).opacity(0.05)
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .cornerRadius(12)
-                }
-                
-                // Upcoming Events Preview
-                VStack(alignment: .leading, spacing: 12) {
-                    HStack {
-                        Text("Upcoming Events")
-                            .font(.system(size: 18, weight: .semibold, design: .rounded))
-                            .foregroundColor(Color(red: 0.45, green: 0.3, blue: 0.6))
-                        
-                        Spacer()
-                        
-                        Text("\(appStore.eventsStore.upcomingEvents.count)")
-                            .font(.system(size: 14, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(
-                                Capsule()
-                                    .fill(Color(red: 0.65, green: 0.3, blue: 0.8))
+            ScrollView {
+                VStack(spacing: 24) {
+                    // Welcome Header
+                    VStack(spacing: 16) {
+                        Text("Welcome to BestWishr!")
+                            .font(.system(size: 28, weight: .bold, design: .rounded))
+                            .foregroundStyle(
+                                LinearGradient(
+                                    colors: [
+                                        Color(red: 0.65, green: 0.3, blue: 0.8),
+                                        Color(red: 0.75, green: 0.4, blue: 0.9)
+                                    ],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
                             )
+                            .multilineTextAlignment(.center)
+                        
+                        if let user = appStore.authStore.user {
+                            Text("Hello, \(user.firstName ?? "User")! 👋")
+                                .font(.system(size: 18, weight: .medium, design: .rounded))
+                                .foregroundColor(Color(red: 0.45, green: 0.3, blue: 0.6))
+                        }
                     }
                     
-                    if appStore.eventsStore.upcomingEvents.isEmpty {
-                        VStack(spacing: 8) {
-                            Image(systemName: "calendar.badge.plus")
-                                .font(.system(size: 24))
-                                .foregroundColor(Color(red: 0.65, green: 0.3, blue: 0.8).opacity(0.6))
-                            
-                            Text("No upcoming events")
-                                .font(.system(size: 14, weight: .medium, design: .rounded))
-                                .foregroundColor(.secondary)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 20)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color(red: 0.65, green: 0.3, blue: 0.8).opacity(0.05))
-                        )
-                    } else {
-                        VStack(spacing: 8) {
-                            ForEach(appStore.eventsStore.upcomingEvents.prefix(3)) { event in
-                                HStack(spacing: 12) {
-                                    // Event type icon
-                                    ZStack {
-                                        Circle()
-                                            .fill(event.eventType.color.opacity(0.2))
-                                            .frame(width: 32, height: 32)
-                                        
-                                        Image(systemName: event.eventType.icon)
-                                            .font(.system(size: 12, weight: .medium))
-                                            .foregroundColor(event.eventType.color)
-                                    }
-                                    
-                                    // Event info
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(event.title)
-                                            .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                            .foregroundColor(.primary)
-                                            .lineLimit(1)
-                                        
-                                        HStack(spacing: 4) {
-                                            Text(event.shortFormattedDate)
-                                                .font(.system(size: 12, weight: .medium, design: .rounded))
-                                                .foregroundColor(.secondary)
-                                            
-                                            if event.daysUntilEvent <= 7 {
-                                                Text("•")
-                                                    .font(.system(size: 12, weight: .medium))
-                                                    .foregroundColor(.secondary)
-                                                
-                                                Text("\(event.daysUntilEvent)d")
-                                                    .font(.system(size: 12, weight: .bold, design: .rounded))
-                                                    .foregroundColor(.orange)
-                                            }
-                                        }
-                                    }
-                                    
-                                    Spacer()
-                                    
-                                    // Event type badge
-                                    Text(event.eventType.rawValue)
-                                        .font(.system(size: 10, weight: .medium, design: .rounded))
-                                        .foregroundColor(event.eventType.color)
-                                        .padding(.horizontal, 6)
-                                        .padding(.vertical, 2)
-                                        .background(
-                                            Capsule()
-                                                .fill(event.eventType.color.opacity(0.1))
-                                        )
-                                }
-                                .padding(12)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .fill(.ultraThinMaterial)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 8)
-                                                .stroke(event.eventType.color.opacity(0.2), lineWidth: 1)
-                                        )
-                                )
-                            }
-                        }
-                    }
+                    // Dashboard Stats
+                    DashboardStatsView()
+                    
+                    // Today's Notifications
+                    TodaysNotificationsView()
+                    
+                    // Quick Actions
+                    QuickActionsView()
+                    
+                    // Upcoming Events Preview (next 30 days)
+                    UpcomingEventsPreview()
                 }
-                .padding(16)
-                .background(
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(.ultraThinMaterial)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 16)
-                                .stroke(Color(red: 0.65, green: 0.3, blue: 0.8).opacity(0.2), lineWidth: 1)
-                        )
-                )
-                
-                Spacer()
+                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
             }
-            .padding()
-            .navigationTitle("Home")
+            .navigationTitle("Dashboard")
+            .refreshable {
+                await loadDashboardData()
+            }
         }
+    }
+    
+    private func loadDashboardData() async {
+        await appStore.contactsStore.loadContacts()
+        await appStore.eventsStore.loadEvents()
     }
 }
 

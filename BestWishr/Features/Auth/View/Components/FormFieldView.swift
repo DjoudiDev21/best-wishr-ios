@@ -25,13 +25,11 @@ struct FormFieldView: View {
                 }
             }
             
-            if isSecure {
-                SecureField(placeholder, text: $text)
-                    .textFieldStyle(CompactTextFieldStyle())
-            } else {
-                TextField(placeholder, text: $text)
-                    .textFieldStyle(CompactTextFieldStyle())
-            }
+            InputField(
+                placeholder: placeholder,
+                text: $text,
+                isSecure: isSecure
+            )
         }
     }
 }

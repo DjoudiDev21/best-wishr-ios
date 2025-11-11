@@ -101,30 +101,9 @@ struct ContactsScreen: View {
                 Spacer()
             }
             .navigationBarHidden(true)
-            .task {
-                await appStore.contactsStore.loadContacts()
-            }
         }
         .sheet(isPresented: $showingAddContact) {
-            // Add contact sheet (placeholder)
-            NavigationView {
-                VStack {
-                    Text("Add Contact")
-                        .font(.largeTitle)
-                        .padding()
-                    Spacer()
-                }
-                .navigationTitle("Add Contact")
-                .navigationBarTitleDisplayMode(.inline)
-                .navigationBarItems(
-                    leading: Button("Cancel") {
-                        showingAddContact = false
-                    },
-                    trailing: Button("Save") {
-                        showingAddContact = false
-                    }
-                )
-            }
+            AddContactScreen()
         }
     }
 }

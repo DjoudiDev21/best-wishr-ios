@@ -8,6 +8,7 @@ final class AppStore: ObservableObject {
     @Published var eventsStore: EventsStore
     @Published var giftsStore: GiftsStore
     @Published var isAuthenticated: Bool = false
+    @Published var isInitializing: Bool = false
     private var cancellables = Set<AnyCancellable>()
 
         init() {
@@ -114,9 +115,15 @@ final class AppStore: ObservableObject {
             authStore.$isAuthenticated
                 .sink { [weak self] authenticated in
                     self?.isAuthenticated = authenticated
-                    if !authenticated {
-                        // Exemple : reset d'autres stores
+                    if authenticated {
+                        // User just authenticated - preload essential data
+                        Task {
+                            await self?.preloadEssentialData()
+                        }
+                    } else {
+                        // User logged out - reset stores
                         // self?.contactsStore.reset()
+                        // self?.eventsStore.reset()
                     }
                 }
                 .store(in: &cancellables)
@@ -147,5 +154,33 @@ final class AppStore: ObservableObject {
                     self?.objectWillChange.send()
                 }
                 .store(in: &cancellables)
+        }
+        
+        // MARK: - Data Preloading
+        
+        private func preloadEssentialData() async {
+            // Only preload if user is authenticated
+            guard isAuthenticated else { return }
+            
+            isInitializing = true
+            
+            await withTaskGroup(of: Void.self) { group in
+                // Load contacts (essential for event creation and contact picker)
+                group.addTask { [weak self] in
+                    await self?.contactsStore.loadContacts()
+                }
+                
+                // Load recent events (last 30 days + next 30 days)
+                group.addTask { [weak self] in
+                    await self?.loadRecentEvents()
+                }
+            }
+            
+            isInitializing = false
+        }
+        
+        private func loadRecentEvents() async {
+            // Load recent and upcoming events (60-day window)
+            await eventsStore.loadRecentEvents()
         }
 }

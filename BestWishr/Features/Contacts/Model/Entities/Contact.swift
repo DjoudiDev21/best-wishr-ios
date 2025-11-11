@@ -54,22 +54,28 @@ enum ContactCategory: String, CaseIterable, Identifiable, Codable {
 // MARK: - Contact Creation
 
 struct ContactCreationData {
-    let firstName: String
-    let lastName: String
-    let email: String?
-    let phoneNumber: String?
-    let dateOfBirth: Date?
-    let category: ContactCategory
+    var firstName: String = ""
+    var lastName: String = ""
+    var email: String = ""
+    var phoneNumber: String = ""
+    var dateOfBirth: Date? = nil
+    var category: ContactCategory = .family
+    var hasBirthday: Bool = false
+    
+    var isValid: Bool {
+        !firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        !lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
     
     func toContact() -> Contact {
         let now = Date()
         return Contact(
             id: UUID().uuidString,
-            firstName: firstName.trimmingCharacters(in: .whitespaces),
-            lastName: lastName.trimmingCharacters(in: .whitespaces),
-            email: email?.trimmingCharacters(in: .whitespaces),
-            phoneNumber: phoneNumber?.trimmingCharacters(in: .whitespaces),
-            dateOfBirth: dateOfBirth,
+            firstName: firstName.trimmingCharacters(in: .whitespacesAndNewlines),
+            lastName: lastName.trimmingCharacters(in: .whitespacesAndNewlines),
+            email: email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : email.trimmingCharacters(in: .whitespacesAndNewlines),
+            phoneNumber: phoneNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : phoneNumber.trimmingCharacters(in: .whitespacesAndNewlines),
+            dateOfBirth: hasBirthday ? dateOfBirth : nil,
             category: category,
             avatar: nil,
             createdAt: now,

@@ -7,9 +7,14 @@ struct BestWishrApp: App {
     var body: some Scene {
         WindowGroup {
             if appStore.isAuthenticated {
-                HomeScreen()
-                    .environmentObject(appStore)
-                    .withErrorHandling()
+                if appStore.isInitializing {
+                    InitializationScreen()
+                        .environmentObject(appStore)
+                } else {
+                    HomeScreen()
+                        .environmentObject(appStore)
+                        .withErrorHandling()
+                }
             } else {
                 LoginScreen(
                     viewModel: AuthViewModel(

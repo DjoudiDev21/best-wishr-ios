@@ -39,15 +39,15 @@ struct CreateContactUseCase {
         }
         
         // Validate email format if provided
-        if let email = data.email, !email.isEmpty {
-            if !isValidEmail(email) {
+        if !data.email.isEmpty {
+            if !isValidEmail(data.email) {
                 return ContactError.invalidData("Please enter a valid email address")
             }
         }
         
         // Validate phone number format if provided
-        if let phone = data.phoneNumber, !phone.isEmpty {
-            if !isValidPhoneNumber(phone) {
+        if !data.phoneNumber.isEmpty {
+            if !isValidPhoneNumber(data.phoneNumber) {
                 return ContactError.invalidData("Please enter a valid phone number")
             }
         }

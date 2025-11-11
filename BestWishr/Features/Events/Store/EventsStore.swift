@@ -154,6 +154,23 @@ final class EventsStore: ObservableObject {
         selectedFilter = .all
     }
     
+    func loadRecentEvents() async {
+        isLoading = true
+        error = nil
+        
+        let result = await presenter.loadRecentEvents()
+        
+        switch result {
+        case .success(let loadedEvents):
+            events = loadedEvents
+        case .failure(let loadError):
+            error = loadError
+            errorHandler.handle(loadError)
+        }
+        
+        isLoading = false
+    }
+    
     // MARK: - Convenience Methods
     func getEventsForContact(contactId: String) -> [Event] {
         return events.filter { $0.contactId == contactId }

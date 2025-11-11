@@ -32,6 +32,17 @@ final class EventsPresenter: EventsPresenterProtocol {
         return await getEventsUseCase.executeUpcoming(limit: limit)
     }
     
+    func loadRecentEvents() async -> Result<[Event], Error> {
+        let calendar = Calendar.current
+        let thirtyDaysAgo = calendar.date(byAdding: .day, value: -30, to: Date()) ?? Date()
+        let thirtyDaysFromNow = calendar.date(byAdding: .day, value: 30, to: Date()) ?? Date()
+        
+        return await getEventsUseCase.executeInDateRange(
+            startDate: thirtyDaysAgo,
+            endDate: thirtyDaysFromNow
+        )
+    }
+    
     func loadEventsForContact(contactId: String) async -> Result<[Event], Error> {
         return await getEventsUseCase.executeForContact(contactId: contactId)
     }

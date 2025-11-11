@@ -105,9 +105,6 @@ struct EventsScreen: View {
                 Spacer()
             }
             .navigationBarHidden(true)
-            .task {
-                await appStore.eventsStore.loadEvents()
-            }
         }
         .sheet(isPresented: $showingAddEvent) {
             AddEventScreen()

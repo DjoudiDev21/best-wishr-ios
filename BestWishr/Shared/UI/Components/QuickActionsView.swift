@@ -58,31 +58,7 @@ struct QuickActionsView: View {
         }
         .padding(.horizontal, 20)
         .sheet(isPresented: $showingAddContact) {
-            // Add contact sheet (placeholder)
-            NavigationView {
-                VStack {
-                    Text("Add Contact")
-                        .font(.largeTitle)
-                        .padding()
-                    
-                    Text("Contact creation form will be implemented here")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .padding()
-                    
-                    Spacer()
-                }
-                .navigationTitle("Add Contact")
-                .navigationBarTitleDisplayMode(.inline)
-                .navigationBarItems(
-                    leading: Button("Cancel") {
-                        showingAddContact = false
-                    },
-                    trailing: Button("Save") {
-                        showingAddContact = false
-                    }
-                )
-            }
+            AddContactScreen()
         }
         .sheet(isPresented: $showingAddEvent) {
             AddEventScreen()

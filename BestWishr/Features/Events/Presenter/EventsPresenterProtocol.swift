@@ -8,6 +8,7 @@ protocol EventsPresenterProtocol {
     ) async -> Result<[Event], Error>
     
     func loadUpcomingEvents(limit: Int?) async -> Result<[Event], Error>
+    func loadRecentEvents() async -> Result<[Event], Error>
     func loadEventsForContact(contactId: String) async -> Result<[Event], Error>
     func loadEventsInDateRange(startDate: Date, endDate: Date) async -> Result<[Event], Error>
     

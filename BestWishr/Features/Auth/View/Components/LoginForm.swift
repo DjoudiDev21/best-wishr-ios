@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct LoginForm: View {
-    @ObservedObject var viewModel: AuthViewModel
+    @ObservedObject var viewModel: LoginViewModel
     @ObservedObject var store: AuthStore
     let onSignUpTap: () -> Void
     let onForgotPasswordTap: () -> Void

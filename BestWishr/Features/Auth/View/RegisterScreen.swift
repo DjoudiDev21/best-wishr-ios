@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct RegisterScreen: View {
-    @ObservedObject var viewModel: AuthViewModel
+    @ObservedObject var viewModel: RegisterViewModel
     @ObservedObject var store: AuthStore
     @Environment(\.dismiss) private var dismiss
     @State private var isAnimating = false

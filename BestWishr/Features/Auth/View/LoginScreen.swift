@@ -1,7 +1,8 @@
 import SwiftUI
 
 struct LoginScreen: View {
-    @ObservedObject var viewModel: AuthViewModel
+    @ObservedObject var loginViewModel: LoginViewModel
+    @ObservedObject var registerViewModel: RegisterViewModel
     @ObservedObject var store: AuthStore
     @State private var showRegister = false
     @State private var showForgotPassword = false
@@ -31,7 +32,7 @@ struct LoginScreen: View {
                 
                 VStack(spacing: 0) {
                     LoginForm(
-                        viewModel: viewModel,
+                        viewModel: loginViewModel,
                         store: store,
                         onSignUpTap: { showRegister = true },
                         onForgotPasswordTap: { showForgotPassword = true }
@@ -42,7 +43,7 @@ struct LoginScreen: View {
             }
         }
         .sheet(isPresented: $showRegister) {
-            RegisterScreen(viewModel:viewModel, store: store)
+            RegisterScreen(viewModel: registerViewModel, store: store)
         }
         .sheet(isPresented: $showForgotPassword) {
             ForgotPasswordScreen()

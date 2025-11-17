@@ -19,9 +19,8 @@ struct BestWishrApp: App {
                     }
                 } else {
                     LoginScreen(
-                        viewModel: AuthViewModel(
-                            store:  appStore.authStore,
-                        ),
+                        loginViewModel: LoginViewModel(store: appStore.authStore),
+                        registerViewModel: RegisterViewModel(store: appStore.authStore),
                         store: appStore.authStore
                     )
                     .environmentObject(appStore)

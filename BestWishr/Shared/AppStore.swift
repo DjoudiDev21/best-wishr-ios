@@ -18,11 +18,13 @@ final class AppStore: ObservableObject {
         let registerUseCase = RegisterUseCase(repository: authRepository)
         let verifyEmailUseCase = VerifyEmailUseCase(repository: authRepository)
         let forgotPasswordUseCase = ForgotPasswordUseCase(repository: authRepository)
+        let appleAuthUseCase = AppleAuthUseCase(repository: authRepository)
         let authPresenter = AuthPresenter(
             loginUseCase: loginUseCase,
             registerUseCase: registerUseCase,
             verifyEmailUseCase: verifyEmailUseCase,
-            forgotPasswordUseCase: forgotPasswordUseCase
+            forgotPasswordUseCase: forgotPasswordUseCase,
+            appleAuthUseCase: appleAuthUseCase
         )
         self.authStore = AuthStore(presenter: authPresenter)
         

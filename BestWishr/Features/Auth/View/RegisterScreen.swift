@@ -41,7 +41,7 @@ struct RegisterScreen: View {
                         agreeToTerms: $viewModel.agreeToTerms,
                         isLoading: .constant(store.isLoading),
                         onCreateAccount: { viewModel.register() },
-                        onSignInTap: { dismiss() }
+                        onLoginTap: { dismiss() }
                     )
                 }
                 .padding(.horizontal, 20)

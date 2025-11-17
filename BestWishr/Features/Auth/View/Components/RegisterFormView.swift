@@ -10,7 +10,7 @@ struct RegisterFormView: View {
     @Binding var isLoading: Bool
     
     let onCreateAccount: () -> Void
-    let onSignInTap: () -> Void
+    let onLoginTap: () -> Void
     
     private var isFormValid: Bool {
         !email.isEmpty &&
@@ -96,7 +96,7 @@ struct RegisterFormView: View {
                     .foregroundColor(Color(red: 0.5, green: 0.4, blue: 0.6))
                 
                 Button("Sign In") {
-                    onSignInTap()
+                    onLoginTap()
                 }
                 .font(.system(size: 12, weight: .bold))
                 .foregroundColor(Color(red: 0.65, green: 0.3, blue: 0.8))
@@ -116,7 +116,7 @@ struct RegisterFormView: View {
         agreeToTerms: .constant(false),
         isLoading: .constant(false),
         onCreateAccount: {},
-        onSignInTap: {}
+        onLoginTap: {}
     )
     .padding()
 }

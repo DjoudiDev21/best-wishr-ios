@@ -52,4 +52,32 @@ final class HttpAuthRepository: AuthRepositoryProtocol {
         // TODO: Implement when forgot password endpoint is available
         fatalError("Forgot password endpoint not implemented yet")
     }
+    
+    func appleAuth(request: AppleAuthRequestDto) async throws -> User {
+        print("🍎 AuthRepository: Starting Apple Sign-In")
+        
+        let body = SocialAuthRequestDto(
+            provider: "APPLE",
+            accessToken: request.identityToken,
+            authorizationCode: request.authorizationCode,
+            platform: "ios",
+            redirectUri: nil
+        )
+        
+        do {
+            let response: SocialAuthResponseDto = try await httpClient.post(.authSocialMobile, body: body)
+            let user = User(
+                id: response.user.id,
+                email: response.user.email,
+                token: response.accessToken,
+                firstname: response.user.firstname,
+                lastname: response.user.lastname
+            )
+            print("✅ AuthRepository: Apple Sign-In successful for user: \(user.id)")
+            return user
+        } catch {
+            print("❌ AuthRepository: Apple Sign-In failed: \(error)")
+            throw error
+        }
+    }
 }

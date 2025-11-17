@@ -92,6 +92,35 @@ final class AuthStore: ObservableObject {
         isLoading = false
     }
     
+    func appleAuth(identityToken: String, authorizationCode: String) async {
+        print("🍎 AuthStore: Starting Apple Sign-In flow")
+        isLoading = true
+        print("🍎 AuthStore: Loading state set to true")
+        
+        let request = AppleAuthRequestDto(
+            userIdentifier: "", // We'll get this from the backend response
+            email: nil, // Backend will extract from token
+            firstName: nil,
+            lastName: nil,
+            identityToken: identityToken,
+            authorizationCode: authorizationCode
+        )
+        
+        let result = await presenter.performAppleAuth(request: request)
+        
+        switch result {
+        case .success(let user):
+            print("🍎 AuthStore: Apple Sign-In successful, handling success")
+            handleLoginSuccess(user)
+        case .failure(let error):
+            print("🍎 AuthStore: Apple Sign-In failed, handling error: \(error)")
+            handleLoginFailure(error)
+        }
+        
+        isLoading = false
+        print("🍎 AuthStore: Loading state set to false")
+    }
+    
     func logout() {
         user = nil
         isAuthenticated = false

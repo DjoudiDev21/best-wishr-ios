@@ -60,7 +60,19 @@ struct LoginForm: View {
                 }
                 
                 SocialLoginButton(icon: "applelogo") {
-                    // TODO: Implement Apple Sign In
+                    Task {
+                        do {
+                            let appleAuthService = AppleAuthService()
+                            let result = try await appleAuthService.auth()
+                            
+                            await store.appleAuth(
+                                identityToken: result.identityToken,
+                                authorizationCode: result.authorizationCode
+                            )
+                        } catch {
+                            print("Apple Sign-In failed: \(error)")
+                        }
+                    }
                 }
             }
             

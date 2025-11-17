@@ -5,6 +5,8 @@ enum ApiEndpoint {
     case authRegister
     case authVerifyEmail
     case authSendEmailVerification
+    case appleAuth
+    case authSocialMobile
     
     func makeRequest(baseURL: URL) throws -> URLRequest {
         var url = baseURL.appendingPathComponent(path)
@@ -24,12 +26,14 @@ enum ApiEndpoint {
         case .authRegister: return "auth/register"
         case .authVerifyEmail: return "auth/verify-email"
         case .authSendEmailVerification: return "auth/send-email-verification"
+        case .appleAuth: return "auth/social/apple-signin"
+        case .authSocialMobile: return "auth/social/mobile"
         }
     }
 
     private var method: String {
         switch self {
-        case .authLogin, .authRegister, .authVerifyEmail, .authSendEmailVerification: return "POST"
+        case .authLogin, .authRegister, .authVerifyEmail, .authSendEmailVerification, .appleAuth, .authSocialMobile: return "POST"
         }
     }
 

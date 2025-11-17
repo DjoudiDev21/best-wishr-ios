@@ -50,11 +50,11 @@ struct BestWishrApp: App {
             switch destination {
             case .verifyEmail(let token, let email):
                 urlManager.setProcessingState(true)
-                let success = await appStore.authStore.verifyEmailAndLogin(token: token, email: email)
+                _ = await appStore.authStore.verifyEmailAndLogin(token: token, email: email)
                 urlManager.setProcessingState(false)
                 urlManager.clearActiveDestination()
                 
-            case .resetPassword(let token, let email):
+            case .resetPassword(_, _):
                 // Handle password reset if needed in future
                 urlManager.clearActiveDestination()
             }

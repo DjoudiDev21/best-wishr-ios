@@ -42,7 +42,7 @@ struct LoginScreen: View {
             }
         }
         .sheet(isPresented: $showRegister) {
-            RegisterScreen()
+            RegisterScreen(viewModel:viewModel, store: store)
         }
         .sheet(isPresented: $showForgotPassword) {
             ForgotPasswordScreen()

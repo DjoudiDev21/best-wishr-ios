@@ -22,6 +22,7 @@ struct AddContactScreen: View {
                 .padding(.vertical, 16)
             }
             .navigationTitle("Add Contact")
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarItems(
                 leading: Button("Cancel") {
@@ -34,6 +35,7 @@ struct AddContactScreen: View {
                 }
                 .disabled(!contactData.isValid || isSubmitting)
             )
+            #endif
         }
     }
     

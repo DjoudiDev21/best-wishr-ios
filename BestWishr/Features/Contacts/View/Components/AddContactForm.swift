@@ -21,16 +21,20 @@ struct AddContactForm: View {
             AddContactFormField(title: "Email", required: false) {
                 TextField("email@example.com", text: $contactData.email)
                     .textFieldStyle(AddContactTextFieldStyle())
+                #if os(iOS)
                     .keyboardType(.emailAddress)
                     .autocapitalization(.none)
                     .autocorrectionDisabled()
+                #endif
             }
             
             // Phone Number
             AddContactFormField(title: "Phone Number", required: false) {
                 TextField("(555) 123-4567", text: $contactData.phoneNumber)
                     .textFieldStyle(AddContactTextFieldStyle())
+                #if os(iOS)
                     .keyboardType(.phonePad)
+                #endif
             }
             
             // Category

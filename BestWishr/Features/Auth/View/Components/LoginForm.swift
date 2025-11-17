@@ -69,15 +69,3 @@ struct LoginForm: View {
         .padding(.horizontal, 24)
     }
 }
-
-#Preview {
-    // Placeholder preview
-    VStack {
-        Text("LoginForm Preview Unavailable")
-            .font(.headline)
-        Text("Provide preview stubs for AuthViewModel and AuthStore or run the app.")
-            .font(.subheadline)
-            .foregroundStyle(.secondary)
-    }
-    .padding()
-}

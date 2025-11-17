@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct GiftSuggestionsView: View {
+    @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var appStore: AppStore
     let contactId: String?
     let eventType: EventType
@@ -12,23 +13,40 @@ struct GiftSuggestionsView: View {
     }
     
     var body: some View {
-        VStack(spacing: 16) {
-            GiftSuggestionsHeader(
-                contactName: contactName,
-                eventType: eventType,
-                hasContent: !appStore.giftsStore.suggestions.isEmpty
-            ) {
-                showingAllSuggestions = true
+        NavigationView {
+            VStack(spacing: 20) {
+                GiftSuggestionsHeader(
+                    contactName: contactName,
+                    eventType: eventType,
+                    hasContent: !appStore.giftsStore.suggestions.isEmpty
+                ) {
+                    showingAllSuggestions = true
+                }
+                
+                GiftSuggestionsContent(
+                    isLoading: appStore.giftsStore.isLoadingSuggestions,
+                    suggestions: appStore.giftsStore.suggestions
+                ) {
+                    Task {
+                        await generateSuggestions()
+                    }
+                }
+                
+                Spacer()
             }
-            
-            GiftSuggestionsContent(
-                isLoading: appStore.giftsStore.isLoadingSuggestions,
-                suggestions: appStore.giftsStore.suggestions
-            ) {
-                Task {
-                    await generateSuggestions()
+            .padding(.horizontal, 20)
+            .padding(.top, 16)
+            .navigationTitle("Gift Ideas")
+            #if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
                 }
             }
+            #endif
         }
         .onAppear {
             Task {

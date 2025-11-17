@@ -5,6 +5,8 @@ struct CustomTextFieldStyle: TextFieldStyle {
     
     func _body(configuration: TextField<Self._Label>) -> some View {
         configuration
+            .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.2))
+            .accentColor(Color(red: 0.65, green: 0.3, blue: 0.8))
             .padding(16)
             .background(
                 RoundedRectangle(cornerRadius: 16)
@@ -35,6 +37,8 @@ struct ModernTextFieldStyle: TextFieldStyle {
     func _body(configuration: TextField<Self._Label>) -> some View {
         configuration
             .font(.system(size: 16))
+            .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.2))
+            .accentColor(Color(red: 0.65, green: 0.3, blue: 0.8))
             .padding(16)
             .background(Color(red: 0.97, green: 0.96, blue: 0.98))
             .cornerRadius(16)
@@ -63,6 +67,8 @@ struct CompactTextFieldStyle: TextFieldStyle {
     func _body(configuration: TextField<Self._Label>) -> some View {
         configuration
             .font(.system(size: 14))
+            .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.2))
+            .accentColor(Color(red: 0.65, green: 0.3, blue: 0.8))
             .padding(12)
             .background(Color(red: 0.97, green: 0.96, blue: 0.98))
             .cornerRadius(12)

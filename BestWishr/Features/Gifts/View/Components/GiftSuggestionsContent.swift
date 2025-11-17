@@ -54,7 +54,10 @@ struct GiftSuggestionsGrid: View {
     let suggestions: [Gift]
     
     var body: some View {
-        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 12) {
+        LazyVGrid(
+            columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 2), 
+            spacing: 12
+        ) {
             ForEach(suggestions.prefix(4)) { gift in
                 GiftSuggestionCard(gift: gift)
             }

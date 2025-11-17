@@ -25,7 +25,9 @@ struct SavedGiftsScreen: View {
                 )
             }
             .navigationTitle("My Gift Ideas")
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.large)
+            #endif
             .task {
                 await appStore.giftsStore.loadWishlistedGifts()
             }

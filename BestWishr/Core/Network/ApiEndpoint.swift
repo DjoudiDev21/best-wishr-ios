@@ -3,6 +3,8 @@ import Foundation
 enum ApiEndpoint {
     case authLogin
     case authRegister
+    case authVerifyEmail
+    case authSendEmailVerification
     
     func makeRequest(baseURL: URL) throws -> URLRequest {
         var url = baseURL.appendingPathComponent(path)
@@ -20,12 +22,14 @@ enum ApiEndpoint {
         switch self {
         case .authLogin: return "auth/login"
         case .authRegister: return "auth/register"
+        case .authVerifyEmail: return "auth/verify-email"
+        case .authSendEmailVerification: return "auth/send-email-verification"
         }
     }
 
     private var method: String {
         switch self {
-        case .authLogin, .authRegister: return "POST"
+        case .authLogin, .authRegister, .authVerifyEmail, .authSendEmailVerification: return "POST"
         }
     }
 

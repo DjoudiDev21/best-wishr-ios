@@ -104,7 +104,9 @@ struct EventsScreen: View {
                 
                 Spacer()
             }
+            #if os(iOS)
             .navigationBarHidden(true)
+            #endif
         }
         .sheet(isPresented: $showingAddEvent) {
             AddEventScreen()

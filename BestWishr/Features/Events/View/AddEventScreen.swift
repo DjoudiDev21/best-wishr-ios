@@ -20,7 +20,7 @@ struct AddEventScreen: View {
                     // Gift Suggestions Section
                     if eventData.isValid {
                         AddEventGiftSuggestionsSection(
-                            eventData: eventData,
+                            eventData: $eventData,
                             showingGiftSuggestions: $showingGiftSuggestions
                         )
                     }
@@ -31,25 +31,25 @@ struct AddEventScreen: View {
                 .padding(.vertical, 16)
             }
             .navigationTitle("Add Event")
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
-            .navigationBarItems(
-                leading: Button("Cancel") {
-                    dismiss()
-                },
-                trailing: Button("Save") {
-                    Task {
-                        await saveEvent()
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
                     }
                 }
-                .disabled(!eventData.isValid || isSubmitting)
-            )
-        }
-        .sheet(isPresented: $showingGiftSuggestions) {
-            if eventData.contactId != nil {
-                GiftSuggestionsView(contactId: eventData.contactId, eventType: eventData.eventType)
-            } else {
-                GiftSuggestionsView(contactId: nil, eventType: eventData.eventType)
+                
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Save") {
+                        Task {
+                            await saveEvent()
+                        }
+                    }
+                    .disabled(!eventData.isValid || isSubmitting)
+                }
             }
+            #endif
         }
     }
     

@@ -100,7 +100,9 @@ struct ContactsScreen: View {
                 
                 Spacer()
             }
+            #if os(iOS)
             .navigationBarHidden(true)
+            #endif
         }
         .sheet(isPresented: $showingAddContact) {
             AddContactScreen()

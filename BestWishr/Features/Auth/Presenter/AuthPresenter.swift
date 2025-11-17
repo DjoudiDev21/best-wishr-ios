@@ -3,11 +3,13 @@ import Foundation
 class AuthPresenter: AuthPresenterProtocol {
     private let loginUseCase: LoginUseCase
     private let registerUseCase: RegisterUseCase
+    private let verifyEmailUseCase: VerifyEmailUseCase
     private let forgotPasswordUseCase: ForgotPasswordUseCase
     
-    init(loginUseCase: LoginUseCase, registerUseCase: RegisterUseCase, forgotPasswordUseCase: ForgotPasswordUseCase) {
+    init(loginUseCase: LoginUseCase, registerUseCase: RegisterUseCase, verifyEmailUseCase: VerifyEmailUseCase, forgotPasswordUseCase: ForgotPasswordUseCase) {
         self.loginUseCase = loginUseCase
         self.registerUseCase = registerUseCase
+        self.verifyEmailUseCase = verifyEmailUseCase
         self.forgotPasswordUseCase = forgotPasswordUseCase
     }
 
@@ -15,8 +17,12 @@ class AuthPresenter: AuthPresenterProtocol {
         await loginUseCase.execute(email: email, password: password)
     }
     
-    func performRegister(email: String, password: String, firstName: String, lastName: String) async -> Result<User, Error> {
-        await registerUseCase.execute(email: email, password: password, firstName: firstName, lastName: lastName)
+    func performRegister(email: String, password: String, firstname: String, lastname: String) async -> Result<Void, Error> {
+        await registerUseCase.execute(email: email, password: password, firstname: firstname, lastname: lastname)
+    }
+    
+    func performEmailVerification(token: String) async -> Result<Void, Error> {
+        await verifyEmailUseCase.execute(token: token)
     }
     
     func performForgotPassword(email: String) async -> Result<Void, Error> {

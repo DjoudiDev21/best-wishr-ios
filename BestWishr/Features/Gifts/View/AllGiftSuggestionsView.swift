@@ -23,12 +23,16 @@ struct AllGiftSuggestionsView: View {
                 .padding(.vertical, 16)
             }
             .navigationTitle("Gift Suggestions")
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
-            .navigationBarItems(
-                trailing: Button("Done") {
-                    dismiss()
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
                 }
-            )
+            }
+            #endif
         }
     }
 }

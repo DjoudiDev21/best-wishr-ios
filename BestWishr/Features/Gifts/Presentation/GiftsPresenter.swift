@@ -79,10 +79,13 @@ class GiftsPresenter: ObservableObject {
     
     func saveToWishlist(_ gift: Gift) async {
         do {
-            let savedGift = try await saveGiftToWishlistUseCase.execute(gift: gift)
-            
-            // Add to local state if not already present
-            if !wishlistedGifts.contains(where: { $0.id == savedGift.id }) {
+            // Check if gift is already wishlisted to toggle
+            if isGiftWishlisted(gift.id) {
+                // Remove from wishlist
+                wishlistedGifts.removeAll { $0.id == gift.id }
+            } else {
+                // Add to wishlist
+                let savedGift = try await saveGiftToWishlistUseCase.execute(gift: gift)
                 wishlistedGifts.append(savedGift)
             }
         } catch {

@@ -57,7 +57,7 @@ struct HomeTabView: View {
                             .multilineTextAlignment(.center)
                         
                         if let user = appStore.authStore.user {
-                            Text("Hello, \(user.firstName ?? "User")! 👋")
+                            Text("Hello, \(user.firstname ?? "User")! 👋")
                                 .font(.system(size: 18, weight: .medium, design: .rounded))
                                 .foregroundColor(Color(red: 0.45, green: 0.3, blue: 0.6))
                         }
@@ -159,7 +159,9 @@ struct SettingsTabView: View {
                     .padding(.bottom, 32)
                 }
             }
+            #if os(iOS)
             .navigationBarHidden(true)
+            #endif
         }
     }
     
@@ -186,13 +188,13 @@ struct SettingsUserProfile: View {
                 )
                 .frame(width: 60, height: 60)
                 .overlay(
-                    Text("\(user.firstName?.prefix(1) ?? "U")\(user.lastName?.prefix(1) ?? "U")")
+                    Text("\(user.firstname?.prefix(1) ?? "U")\(user.lastname?.prefix(1) ?? "U")")
                         .font(.system(size: 20, weight: .bold, design: .rounded))
                         .foregroundColor(.white)
                 )
             
             VStack(alignment: .leading, spacing: 4) {
-                Text("\(user.firstName ?? "User") \(user.lastName ?? "")")
+                Text("\(user.firstname ?? "User") \(user.lastname ?? "")")
                     .font(.system(size: 16, weight: .semibold, design: .rounded))
                     .foregroundColor(Color(red: 0.45, green: 0.3, blue: 0.6))
                 

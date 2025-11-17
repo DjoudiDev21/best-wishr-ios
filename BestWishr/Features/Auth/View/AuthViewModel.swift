@@ -2,8 +2,13 @@ import Foundation
 import Combine
 
 final class AuthViewModel: ObservableObject {
-    @Published var email = "user@example.com"  // Default for easy testing
-    @Published var password = "password123"    // Default for easy testing
+    // Form state only
+    @Published var email = "abdelkrim.djoudi.dev@gmail.com"
+    @Published var password = "Gstarraw95100?"
+    @Published var firstname = "A"
+    @Published var lastname = "B"
+    @Published var confirmPassword = "Gstarraw95100?"
+    @Published var agreeToTerms = true
     @Published var isButtonDisabled = true
     
     private let store: AuthStore
@@ -14,11 +19,11 @@ final class AuthViewModel: ObservableObject {
     }
     
     private func setupBindings() {
-         // Exemple : validation simple
-         $email.combineLatest($password)
-             .map { $0.isEmpty || $1.isEmpty }
-             .assign(to: &$isButtonDisabled)
-     }
+        // Form validation only
+        $email.combineLatest($password)
+            .map { $0.isEmpty || $1.isEmpty }
+            .assign(to: &$isButtonDisabled)
+    }
     
     func login() {
 //        guard email.isValidEmail else {
@@ -28,6 +33,17 @@ final class AuthViewModel: ObservableObject {
 
         Task {
             await store.login(email: email, password: password)
+        }
+    }
+    
+    func register() {
+//        guard email.isValidEmail else {
+//            errorMessage = "Email invalide"
+//            return
+//        }
+
+        Task {
+            await store.register(email: email, password: password, firstname: firstname, lastname: lastname)
         }
     }
 }

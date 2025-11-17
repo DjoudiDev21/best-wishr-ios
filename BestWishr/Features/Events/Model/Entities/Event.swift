@@ -81,6 +81,7 @@ struct EventCreationData {
     var date: Date = Date()
     var isRecurring: Bool = false
     var hasReminders: Bool = true
+    var giftSuggestionsEnabled: Bool = false
     
     var isValid: Bool {
         !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty

@@ -4,6 +4,6 @@ struct LoginResponseDto: Decodable {
     let id: String
     let email: String
     let token: String
-    let firstName: String?
-    let lastName: String?
+    let firstname: String?
+    let lastname: String?
 }

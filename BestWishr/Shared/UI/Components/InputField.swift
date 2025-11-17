@@ -58,23 +58,37 @@ struct InputField: View {
     @Binding var text: String
     var isSecure: Bool = false
     var inputType: InputType = .text
+    @State private var isPasswordVisible: Bool = false
     
     var body: some View {
-        Group {
+        HStack {
+            Group {
+                if isSecure && !isPasswordVisible {
+                    SecureField(placeholder, text: $text)
+                        .textFieldStyle(CompactTextFieldStyle())
+                } else {
+                    #if os(iOS)
+                    TextField(placeholder, text: $text)
+                        .textFieldStyle(CompactTextFieldStyle())
+                        .keyboardType(inputType.keyboardType)
+                        .textContentType(inputType.textContentType)
+                        .autocapitalization(inputType.autocapitalizationType)
+                    #else
+                    TextField(placeholder, text: $text)
+                        .textFieldStyle(CompactTextFieldStyle())
+                    #endif
+                }
+            }
+            
             if isSecure {
-                SecureField(placeholder, text: $text)
-                    .textFieldStyle(CompactTextFieldStyle())
-            } else {
-                #if os(iOS)
-                TextField(placeholder, text: $text)
-                    .textFieldStyle(CompactTextFieldStyle())
-                    .keyboardType(inputType.keyboardType)
-                    .textContentType(inputType.textContentType)
-                    .autocapitalization(inputType.autocapitalizationType)
-                #else
-                TextField(placeholder, text: $text)
-                    .textFieldStyle(CompactTextFieldStyle())
-                #endif
+                Button(action: {
+                    isPasswordVisible.toggle()
+                }) {
+                    Image(systemName: isPasswordVisible ? "eye.slash" : "eye")
+                        .foregroundColor(Color(red: 0.6, green: 0.6, blue: 0.6))
+                        .font(.system(size: 16))
+                }
+                .padding(.trailing, 12)
             }
         }
     }

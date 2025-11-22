@@ -56,5 +56,10 @@ struct RegisterScreen: View {
                 showFloatingIcons = true
             }
         }
+        .onChange(of: viewModel.shouldDismiss) { shouldDismiss in
+            if shouldDismiss {
+                dismiss()
+            }
+        }
     }
 }

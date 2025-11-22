@@ -69,9 +69,7 @@ struct GiftSuggestionsGrid: View {
     VStack(spacing: 20) {
         GiftSuggestionsLoadingState()
         
-        GiftSuggestionsEmptyState {
-            print("Generate tapped")
-        }
+        GiftSuggestionsEmptyState { }
     }
     .padding()
 }

@@ -57,7 +57,7 @@ struct FormFieldTrailingButton {
             isSecure: true,
             trailingButton: FormFieldTrailingButton(
                 title: "Forgot?",
-                action: { print("Forgot password tapped") }
+                action: { }
             )
         )
     }

@@ -243,19 +243,13 @@ struct SkeletonGiftCard: View {
             eventType: .birthday,
             hasContent: true,
             isLoading: false
-        ) {
-            print("Refresh tapped")
-        }
+        ) { }
         
         InlineGiftSuggestionsLoadingState()
         
-        InlineGiftSuggestionsInitialState {
-            print("Generate tapped")
-        }
+        InlineGiftSuggestionsInitialState { }
         
-        InlineGiftSuggestionsEmptyState {
-            print("Try again tapped")
-        }
+        InlineGiftSuggestionsEmptyState { }
     }
     .padding()
 }

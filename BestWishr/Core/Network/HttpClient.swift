@@ -19,17 +19,12 @@ final class HttpClient: HttpClientProtocol {
 
     func get<T: Decodable>(_ endpoint: ApiEndpoint) async throws -> T {
         let request = try endpoint.makeRequest(baseURL: baseURL)
-        print("🌐 GET Request: \(request.url?.absoluteString ?? "Unknown URL")")
-        print("📤 Headers: \(request.allHTTPHeaderFields ?? [:])")
         
         do {
             let (data, response) = try await session.data(for: request)
-            print("📥 Response received: \(data.count) bytes")
             let result: T = try decodeResponse(data: data, response: response)
-            print("✅ GET Success: \(type(of: result))")
             return result
         } catch {
-            print("❌ GET Failed: \(error)")
             throw error
         }
     }
@@ -40,7 +35,7 @@ final class HttpClient: HttpClientProtocol {
         request.httpBody = try JSONEncoder().encode(body)
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        print("🌐 POST Request: \(request.url?.absoluteString ?? "Unknown URL")")
+        print("🌐 POST Request: \(request.url?.absoluteString ?? "unknown URL")")
         print("📤 Headers: \(request.allHTTPHeaderFields ?? [:])")
         if let bodyData = request.httpBody, let bodyString = String(data: bodyData, encoding: .utf8) {
             print("📤 Body: \(bodyString)")
@@ -48,12 +43,18 @@ final class HttpClient: HttpClientProtocol {
         
         do {
             let (data, response) = try await session.data(for: request)
-            print("📥 Response received: \(data.count) bytes")
+            
+            // Log response details
+            if let httpResponse = response as? HTTPURLResponse {
+                print("📥 Response received: \(data.count) bytes, status: \(httpResponse.statusCode)")
+                if let responseString = String(data: data, encoding: .utf8) {
+                    print("📥 Response body: \(responseString)")
+                }
+            }
+            
             let result: T = try decodeResponse(data: data, response: response)
-            print("✅ POST Success: \(type(of: result))")
             return result
         } catch {
-            print("❌ POST Failed: \(error)")
             throw error
         }
     }
@@ -64,19 +65,14 @@ final class HttpClient: HttpClientProtocol {
         request.httpBody = try JSONEncoder().encode(body)
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        print("🌐 POST (void) Request: \(request.url?.absoluteString ?? "Unknown URL")")
-        print("📤 Headers: \(request.allHTTPHeaderFields ?? [:])")
         if let bodyData = request.httpBody, let bodyString = String(data: bodyData, encoding: .utf8) {
             print("📤 Body: \(bodyString)")
         }
         
         do {
             let (data, response) = try await session.data(for: request)
-            print("📥 Response received: \(data.count) bytes")
             try validateResponse(response: response, data: data)
-            print("✅ POST (void) Success")
         } catch {
-            print("❌ POST (void) Failed: \(error)")
             throw error
         }
     }
@@ -99,8 +95,6 @@ final class HttpClient: HttpClientProtocol {
                     errorMessage = messages.joined(separator: ", ")
                 }
             }
-            
-            print("🚨 HTTP Error \(statusCode): \(errorMessage)")
             
             switch statusCode {
             case 401:

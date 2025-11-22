@@ -8,6 +8,22 @@ struct LoginForm: View {
     
     var body: some View {
         VStack(spacing: 16) {
+            if viewModel.needsEmailVerification {
+                VerificationBanner(
+                    email: viewModel.emailForResend,
+                    onResend: { email in
+                        print("🔄 LoginForm: VerificationBanner onResend callback received for email: '\(email)'")
+                        viewModel.resendVerificationEmail()
+                        print("🔄 LoginForm: viewModel.resendVerificationEmail() call completed")
+                    },
+                    onDismiss: {
+                        print("❌ LoginForm: VerificationBanner onDismiss callback received")
+                        viewModel.dismissVerificationBanner()
+                    },
+                    isLoading: store.isResendingVerification
+                )
+            }
+            
             VStack(alignment: .leading, spacing: 16) {
                 Text("Welcome Back!")
                     .font(.system(size: 20, weight: .bold))
@@ -69,9 +85,7 @@ struct LoginForm: View {
                                 identityToken: result.identityToken,
                                 authorizationCode: result.authorizationCode
                             )
-                        } catch {
-                            print("Apple Sign-In failed: \(error)")
-                        }
+                        } catch { }
                     }
                 }
             }

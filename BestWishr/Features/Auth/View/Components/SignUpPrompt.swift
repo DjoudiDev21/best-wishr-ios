@@ -19,8 +19,6 @@ struct SignUpPrompt: View {
 }
 
 #Preview {
-    SignUpPrompt {
-        print("Sign up tapped")
-    }
+    SignUpPrompt { }
     .padding()
 }

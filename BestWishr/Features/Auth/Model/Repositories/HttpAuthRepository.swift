@@ -7,43 +7,66 @@ final class HttpAuthRepository: AuthRepositoryProtocol {
         self.httpClient = httpClient
     }
     
-    func login(email: String, password: String) async throws -> User {
-        print("🔐 AuthRepository: Starting login for email: \(email)")
-        
+    func login(email: String, password: String) async throws -> AuthSession {
         let body = LoginRequestDto(email: email, password: password)
         do {
             let response: LoginResponseDto = try await httpClient.post(.authLogin, body: body)
-            let user = User(id: response.id, email: response.email, token: response.token, firstname: response.firstname, lastname: response.lastname)
-            print("✅ AuthRepository: Login successful for user: \(user.id)")
-            return user
+            let user = User(
+                id: response.user.id, 
+                email: response.user.email, 
+                firstname: response.user.firstname, 
+                lastname: response.user.lastname
+            )
+            let tokens = AuthTokens(
+                accessToken: response.accessToken, 
+                refreshToken: response.refreshToken
+            )
+            let session = AuthSession(user: user, tokens: tokens)
+            return session
         } catch {
-            print("❌ AuthRepository: Login failed for email \(email): \(error)")
             throw error
         }
     }
     
     func register(email: String, password: String, firstname: String, lastname: String) async throws {
-        print("📝 AuthRepository: Starting registration for email: \(email)")
-        
         let body = RegisterRequestDto(email: email, password: password, firstname: firstname, lastname: lastname)
         do {
             try await httpClient.postVoid(.authRegister, body: body)
-            print("✅ AuthRepository: Registration successful for email: \(email)")
         } catch {
-            print("❌ AuthRepository: Registration failed for email \(email): \(error)")
             throw error
         }
     }
     
-    func verifyEmail(token: String) async throws -> Void {
-        print("✉️ AuthRepository: Starting email verification with token")
-        
+    func verifyEmail(token: String) async throws -> AuthSession {
         let body = VerifyEmailRequestDto(token: token)
         do {
-            try await httpClient.postVoid(.authVerifyEmail, body: body)
-            print("✅ AuthRepository: Email verification successful")
+            let response: VerifyEmailResponseDto = try await httpClient.post(.authVerifyEmail, body: body)
+            let user = User(
+                id: response.user.id, 
+                email: response.user.email, 
+                firstname: response.user.firstname, 
+                lastname: response.user.lastname
+            )
+            let tokens = AuthTokens(
+                accessToken: response.accessToken, 
+                refreshToken: response.refreshToken
+            )
+            let session = AuthSession(user: user, tokens: tokens)
+            return session
         } catch {
-            print("❌ AuthRepository: Email verification failed: \(error)")
+            throw error
+        }
+    }
+    
+    func resendVerificationEmail(email: String) async throws {
+        print("📧 AuthRepository: Resending verification email to: \(email)")
+        
+        let body = SendEmailVerificationDto(email: email)
+        do {
+            let response: ResendVerificationResponseDto = try await httpClient.post(.authSendEmailVerification, body: body)
+            print("✅ AuthRepository: Verification email sent successfully - \(response.message)")
+        } catch {
+            print("❌ AuthRepository: Failed to send verification email: \(error)")
             throw error
         }
     }
@@ -53,9 +76,7 @@ final class HttpAuthRepository: AuthRepositoryProtocol {
         fatalError("Forgot password endpoint not implemented yet")
     }
     
-    func appleAuth(request: AppleAuthRequestDto) async throws -> User {
-        print("🍎 AuthRepository: Starting Apple Sign-In")
-        
+    func appleAuth(request: AppleAuthRequestDto) async throws -> AuthSession {
         let body = SocialAuthRequestDto(
             provider: "APPLE",
             accessToken: request.identityToken,
@@ -69,14 +90,16 @@ final class HttpAuthRepository: AuthRepositoryProtocol {
             let user = User(
                 id: response.user.id,
                 email: response.user.email,
-                token: response.accessToken,
                 firstname: response.user.firstname,
                 lastname: response.user.lastname
             )
-            print("✅ AuthRepository: Apple Sign-In successful for user: \(user.id)")
-            return user
+            let tokens = AuthTokens(
+                accessToken: response.accessToken,
+                refreshToken: response.refreshToken
+            )
+            let session = AuthSession(user: user, tokens: tokens)
+            return session
         } catch {
-            print("❌ AuthRepository: Apple Sign-In failed: \(error)")
             throw error
         }
     }

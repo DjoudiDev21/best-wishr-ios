@@ -20,16 +20,17 @@ final class HttpAuthRepositoryTests: XCTestCase {
     // ✅ Successful HTTP response → User mapping
     func testLogin_withValidCredentials_returnsUser() async throws {
         // Given
-        let expectedResponse = LoginResponseDto(id: "id", email: "test@test.com", token: "token")
+        let userDto = UserDto(id: "id", email: "test@test.com", firstname: "John", lastname: "Doe")
+        let expectedResponse = LoginResponseDto(user: userDto, accessToken: "token", refreshToken: "refresh")
         mockClient.postResult = .success(expectedResponse)
 
         // When
-        let user = try await repository.login(email: "test@test.com", password: "pass")
+        let session = try await repository.login(email: "test@test.com", password: "pass")
 
         // Then
-        XCTAssertEqual(user.id, "id")
-        XCTAssertEqual(user.email, "test@test.com")
-        XCTAssertEqual(user.token, "token")
+        XCTAssertEqual(session.user.id, "id")
+        XCTAssertEqual(session.user.email, "test@test.com")
+        XCTAssertEqual(session.tokens.accessToken, "token")
     }
     
     // ✅ HTTP errors → Domain errors
@@ -91,40 +92,43 @@ final class HttpAuthRepositoryTests: XCTestCase {
     // ✅ Data transformation
     func testLogin_withValidResponse_mapsFieldsCorrectly() async throws {
         // Given
-        let responseDto = LoginResponseDto(id: "user123", email: "john@example.com", token: "jwt_token_abc")
+        let userDto = UserDto(id: "user123", email: "john@example.com", firstname: "John", lastname: "Doe")
+        let responseDto = LoginResponseDto(user: userDto, accessToken: "jwt_token_abc", refreshToken: "refresh_token")
         mockClient.postResult = .success(responseDto)
 
         // When
-        let user = try await repository.login(email: "john@example.com", password: "password")
+        let session = try await repository.login(email: "john@example.com", password: "password")
 
         // Then - Verify mapping from DTO to User
-        XCTAssertEqual(user.id, responseDto.id)
-        XCTAssertEqual(user.email, responseDto.email)
-        XCTAssertEqual(user.token, responseDto.token)
+        XCTAssertEqual(session.user.id, userDto.id)
+        XCTAssertEqual(session.user.email, userDto.email)
+        XCTAssertEqual(session.tokens.accessToken, "jwt_token_abc")
     }
 
     // ✅ Request construction
     func testLogin_callsCorrectEndpoint() async throws {
         // Note: This test requires enhancing MockHttpClient to track which endpoint was called
         // For now, we test that the method completes successfully, indicating correct endpoint usage
-        let responseDto = LoginResponseDto(id: "user123", email: "test@test.com", token: "token")
+        let userDto = UserDto(id: "user123", email: "test@test.com", firstname: "Test", lastname: "User")
+        let responseDto = LoginResponseDto(user: userDto, accessToken: "token", refreshToken: "refresh")
         mockClient.postResult = .success(responseDto)
 
-        let user = try await repository.login(email: "test@test.com", password: "password")
+        let session = try await repository.login(email: "test@test.com", password: "password")
 
         // If we get here, the endpoint was called correctly
-        XCTAssertNotNil(user)
+        XCTAssertNotNil(session)
     }
     
     func testLogin_sendsCorrectRequestBody() async throws {
         // Note: This test requires enhancing MockHttpClient to capture the request body
         // For now, we test that the method completes successfully, indicating correct body construction
-        let responseDto = LoginResponseDto(id: "user123", email: "test@test.com", token: "token")
+        let userDto = UserDto(id: "user123", email: "test@test.com", firstname: "Test", lastname: "User")
+        let responseDto = LoginResponseDto(user: userDto, accessToken: "token", refreshToken: "refresh")
         mockClient.postResult = .success(responseDto)
 
-        let user = try await repository.login(email: "test@test.com", password: "mypassword")
+        let session = try await repository.login(email: "test@test.com", password: "mypassword")
 
         // If we get here, the request body was constructed correctly
-        XCTAssertEqual(user.email, "test@test.com")
+        XCTAssertEqual(session.user.email, "test@test.com")
     }
 }

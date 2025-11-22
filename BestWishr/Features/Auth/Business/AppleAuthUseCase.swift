@@ -7,10 +7,10 @@ struct AppleAuthUseCase {
         self.repository = repository
     }
 
-    func execute(request: AppleAuthRequestDto) async -> Result<User, Error> {
+    func execute(request: AppleAuthRequestDto) async -> Result<AuthSession, Error> {
         do {
-            let user = try await repository.appleAuth(request: request)
-            return .success(user)
+            let session = try await repository.appleAuth(request: request)
+            return .success(session)
         } catch {
             return .failure(error)
         }

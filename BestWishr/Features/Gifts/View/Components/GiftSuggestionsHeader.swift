@@ -49,17 +49,13 @@ struct GiftSuggestionsHeader: View {
             contactName: "John Doe",
             eventType: .birthday,
             hasContent: true
-        ) {
-            print("View All tapped")
-        }
+        ) { }
         
         GiftSuggestionsHeader(
             contactName: nil,
             eventType: .anniversary,
             hasContent: false
-        ) {
-            print("View All tapped")
-        }
+        ) { }
     }
     .padding()
 }

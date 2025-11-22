@@ -7,10 +7,10 @@ class VerifyEmailUseCase {
         self.repository = repository
     }
     
-    func execute(token: String) async -> Result<Void, Error> {
+    func execute(token: String) async -> Result<AuthSession, Error> {
         do {
-            try await repository.verifyEmail(token: token)
-            return .success(())
+            let session = try await repository.verifyEmail(token: token)
+            return .success(session)
         } catch {
             return .failure(error)
         }

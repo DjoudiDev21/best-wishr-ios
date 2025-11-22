@@ -14,7 +14,7 @@ class URLManager: ObservableObject {
     func handleURL(url: URL) -> Bool {
         // Handle both custom scheme and Universal Links
         let isCustomScheme = url.scheme == "bestwishr"
-        let isUniversalLink = url.scheme == "https" && url.host == "bestwishr.com"
+        let isUniversalLink = url.scheme == "https" && (url.host == "bestwishr.com" || url.host == "api.bestwishr.com")
         
         guard isCustomScheme || isUniversalLink else { return false }
         
@@ -23,8 +23,8 @@ class URLManager: ObservableObject {
         
         switch path {
         case "verify-email":
-            if let token = components?.queryItems?.first(where: { $0.name == "token" })?.value,
-               let email = components?.queryItems?.first(where: { $0.name == "email" })?.value {
+            if let token = components?.queryItems?.first(where: { $0.name == "token" })?.value {
+                let email = components?.queryItems?.first(where: { $0.name == "email" })?.value ?? ""
                 activeDestination = .verifyEmail(token: token, email: email)
                 return true
             }

@@ -17,12 +17,14 @@ final class AppStore: ObservableObject {
         let loginUseCase = LoginUseCase(repository: authRepository)
         let registerUseCase = RegisterUseCase(repository: authRepository)
         let verifyEmailUseCase = VerifyEmailUseCase(repository: authRepository)
+        let resendVerificationUseCase = ResendVerificationUseCase(repository: authRepository)
         let forgotPasswordUseCase = ForgotPasswordUseCase(repository: authRepository)
         let appleAuthUseCase = AppleAuthUseCase(repository: authRepository)
         let authPresenter = AuthPresenter(
             loginUseCase: loginUseCase,
             registerUseCase: registerUseCase,
             verifyEmailUseCase: verifyEmailUseCase,
+            resendVerificationUseCase: resendVerificationUseCase,
             forgotPasswordUseCase: forgotPasswordUseCase,
             appleAuthUseCase: appleAuthUseCase
         )
@@ -78,10 +80,6 @@ final class AppStore: ObservableObject {
         let envURL = ProcessInfo.processInfo.environment["BACKEND_URL"]
         let bundleURL = Bundle.main.object(forInfoDictionaryKey: "BACKEND_URL") as? String
         let urlString = envURL ?? bundleURL ?? "https://api.example.com"
-        
-        print("🌍 AppStore: Environment BACKEND_URL: \(envURL ?? "nil")")
-        print("🌍 AppStore: Bundle BACKEND_URL: \(bundleURL ?? "nil")")
-        print("🌍 AppStore: Final URL being used: \(urlString)")
         
         return URL(string: urlString)!
     }()

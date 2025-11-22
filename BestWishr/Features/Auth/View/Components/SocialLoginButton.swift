@@ -23,13 +23,9 @@ struct SocialLoginButton: View {
 
 #Preview {
     HStack(spacing: 10) {
-        SocialLoginButton(icon: "globe") {
-            print("Google Sign In")
-        }
+        SocialLoginButton(icon: "globe") { }
         
-        SocialLoginButton(icon: "applelogo") {
-            print("Apple Sign In")
-        }
+        SocialLoginButton(icon: "applelogo") { }
     }
     .padding()
 }

@@ -123,16 +123,12 @@ struct ContactCard: View {
         ContactCard(
             contact: sampleContact1,
             hasUpcomingEvent: true
-        ) {
-            print("Contact tapped")
-        }
+        ) { }
         
         ContactCard(
             contact: sampleContact2,
             hasUpcomingEvent: false
-        ) {
-            print("Contact tapped")
-        }
+        ) { }
     }
     .padding()
 }

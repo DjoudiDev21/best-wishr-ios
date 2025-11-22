@@ -69,9 +69,7 @@ struct ScreenHeader: View {
             title: "My Contacts",
             subtitle: "24 contacts",
             actionIcon: "plus.circle.fill"
-        ) {
-            print("Action tapped")
-        }
+        ) { }
         
         ScreenHeader(
             title: "Events",

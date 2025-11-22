@@ -9,6 +9,7 @@ final class RegisterViewModel: ObservableObject {
     @Published var confirmPassword = "Gstarraw95100?"
     @Published var agreeToTerms = true
     @Published var isButtonDisabled = true
+    @Published var shouldDismiss = false
     
     private let store: AuthStore
     private var cancellables = Set<AnyCancellable>()
@@ -39,6 +40,13 @@ final class RegisterViewModel: ObservableObject {
     func register() {
         Task {
             await store.register(email: email, password: password, firstname: firstname, lastname: lastname)
+            
+            // If registration was successful (no loading state means it completed), dismiss immediately
+            await MainActor.run {
+                if !store.isLoading {
+                    shouldDismiss = true
+                }
+            }
         }
     }
 }

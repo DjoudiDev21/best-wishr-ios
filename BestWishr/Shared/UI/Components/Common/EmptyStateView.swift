@@ -71,9 +71,7 @@ struct EmptyStateView: View {
             title: "No Contacts Yet",
             message: "Start building your contact list to keep track of important dates and celebrations.",
             actionTitle: "Add Your First Contact"
-        ) {
-            print("Add contact tapped")
-        }
+        ) { }
         
         EmptyStateView(
             icon: "magnifyingglass",

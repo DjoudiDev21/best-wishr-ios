@@ -93,12 +93,7 @@ extension AppleAuthService: ASAuthorizationControllerDelegate {
     }
     
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
-        print("🍎 Apple Auth Error: \(error)")
-        
         if let authError = error as? ASAuthorizationError {
-            print("🍎 ASAuthorizationError Code: \(authError.code.rawValue)")
-            print("🍎 ASAuthorizationError Description: \(authError.localizedDescription)")
-            
             switch authError.code {
             case .canceled:
                 continuation?.resume(throwing: AppleAuthError.userCanceled)

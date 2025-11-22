@@ -7,10 +7,10 @@ struct LoginUseCase {
          self.repository = repository
      }
 
-    func execute(email: String, password: String) async -> Result<User, Error> {
+    func execute(email: String, password: String) async -> Result<AuthSession, Error> {
         do {
-            let user = try await repository.login(email: email, password: password)
-            return .success(user)
+            let session = try await repository.login(email: email, password: password)
+            return .success(session)
         } catch {
             return .failure(error)
         }

@@ -3,7 +3,7 @@ import Foundation
 struct SocialAuthResponseDto: Codable {
     let accessToken: String
     let refreshToken: String
-    let user: User
+    let user: UserDto
     let isNewUser: Bool
     let linkedAccounts: [SocialAccount]
     

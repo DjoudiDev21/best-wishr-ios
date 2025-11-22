@@ -20,20 +20,22 @@ final class LoginUseCaseTests: XCTestCase {
     // ✅ Happy path
     func testExecute_withValidCredentials_returnsSuccess() async {
         // Given
-        let expectedUser = User(id: "1", email: "test@test.com", token: "token")
-        mockRepository.loginResult = .success(expectedUser)
+        let expectedUser = User(id: "1", email: "test@test.com", firstname: "John", lastname: "Doe")
+        let expectedTokens = AuthTokens(accessToken: "access_token", refreshToken: "refresh_token")
+        let expectedSession = AuthSession(user: expectedUser, tokens: expectedTokens)
+        mockRepository.loginResult = .success(expectedSession)
 
         // When
         let result = await useCase.execute(email: "test@test.com", password: "password")
 
         // Then
-        guard case .success(let user) = result else {
+        guard case .success(let session) = result else {
             XCTFail("Expected success but got failure")
             return
         }
-        XCTAssertEqual(user.id, expectedUser.id)
-        XCTAssertEqual(user.email, expectedUser.email)
-        XCTAssertEqual(user.token, expectedUser.token)
+        XCTAssertEqual(session.user.id, expectedUser.id)
+        XCTAssertEqual(session.user.email, expectedUser.email)
+        XCTAssertEqual(session.tokens.accessToken, expectedTokens.accessToken)
     }
     
     // ✅ Error handling
@@ -58,8 +60,10 @@ final class LoginUseCaseTests: XCTestCase {
     func testExecute_withEmptyEmail_returnsValidationError() async {
         // TODO: Implement validation in LoginUseCase first
         // Given
-        let expectedUser = User(id: "1", email: "test@test.com", token: "token")
-        mockRepository.loginResult = .success(expectedUser)
+        let expectedUser = User(id: "1", email: "test@test.com", firstname: "John", lastname: "Doe")
+        let expectedTokens = AuthTokens(accessToken: "access_token", refreshToken: "refresh_token")
+        let expectedSession = AuthSession(user: expectedUser, tokens: expectedTokens)
+        mockRepository.loginResult = .success(expectedSession)
 
         // When
         let result = await useCase.execute(email: "", password: "password")
@@ -75,8 +79,10 @@ final class LoginUseCaseTests: XCTestCase {
     func testExecute_withEmptyPassword_returnsValidationError() async {
         // TODO: Implement validation in LoginUseCase first
         // Given
-        let expectedUser = User(id: "1", email: "test@test.com", token: "token")
-        mockRepository.loginResult = .success(expectedUser)
+        let expectedUser = User(id: "1", email: "test@test.com", firstname: "John", lastname: "Doe")
+        let expectedTokens = AuthTokens(accessToken: "access_token", refreshToken: "refresh_token")
+        let expectedSession = AuthSession(user: expectedUser, tokens: expectedTokens)
+        mockRepository.loginResult = .success(expectedSession)
 
         // When
         let result = await useCase.execute(email: "test@test.com", password: "")

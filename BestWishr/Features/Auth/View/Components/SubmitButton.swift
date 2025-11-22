@@ -43,7 +43,7 @@ struct SubmitButton: View {
     VStack(spacing: 20) {
         SubmitButton(
             title: "Sign In",
-            action: { print("Sign In tapped") }
+            action: { }
         )
         
         SubmitButton(

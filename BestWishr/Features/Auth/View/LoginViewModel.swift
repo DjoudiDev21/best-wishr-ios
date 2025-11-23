@@ -15,6 +15,7 @@ final class LoginViewModel: ObservableObject {
         self.store = store
         setupBindings()
         observeAuthState()
+        observeResendNotifications()
     }
     
     private func setupBindings() {
@@ -34,15 +35,16 @@ final class LoginViewModel: ObservableObject {
     }
     
     func resendVerificationEmail() {
-        print("📧 LoginViewModel: resendVerificationEmail() called with email: '\(emailForResend)'")
-        guard !emailForResend.isEmpty else { 
-            print("❌ LoginViewModel: resendVerificationEmail() - email is empty, aborting")
-            return 
+        guard !emailForResend.isEmpty else {
+            return
         }
         
         Task {
-            print("📤 LoginViewModel: Calling store.resendVerificationEmail with email: '\(emailForResend)'")
+            ResendNotificationCenter.shared.setLoading(true)
+            ResendNotificationCenter.shared.setSuccess(false)
             await store.resendVerificationEmail(email: emailForResend)
+            ResendNotificationCenter.shared.setLoading(false)
+            ResendNotificationCenter.shared.setSuccess(true)
         }
     }
     
@@ -78,6 +80,20 @@ final class LoginViewModel: ObservableObject {
         // Use email from store (extracted from verification URL)
         emailForResend = store.emailForVerificationResend.trimmingCharacters(in: .whitespacesAndNewlines)
         
-        print("📧 LoginViewModel: Verification banner setup - needsEmailVerification: \(needsEmailVerification), emailForResend: '\(emailForResend)'")
+        // Trigger global header banner
+        GlobalErrorHandler.shared.handle(
+            .authentication("Email verification required"),
+            presentationMode: .banner,
+            context: ["email": emailForResend]
+        )
+    }
+    
+    private func observeResendNotifications() {
+        ResendNotificationCenter.shared.resendPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] email in
+                self?.resendVerificationEmail()
+            }
+            .store(in: &cancellables)
     }
 }

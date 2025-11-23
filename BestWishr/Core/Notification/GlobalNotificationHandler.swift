@@ -57,9 +57,7 @@ final class GlobalNotificationHandler: GlobalNotificationHandlerProtocol, Observ
     }
     
     func showSuccess(_ message: String, duration: TimeInterval) {
-        print("🔔 GlobalNotificationHandler: showSuccess() called with message: '\(message)'")
         let notification = AppNotification(message: message, type: .success, duration: duration)
-        print("🔔 GlobalNotificationHandler: Sending notification to subject")
         notificationSubject.send(notification)
     }
     
@@ -82,15 +80,11 @@ final class GlobalNotificationHandler: GlobalNotificationHandlerProtocol, Observ
     }
     
     private func showNotification(_ notification: AppNotification) {
-        print("🔔 GlobalNotificationHandler: showNotification() called with message: '\(notification.message)'")
-        print("🔔 GlobalNotificationHandler: Current state - isShowing: \(isShowingNotification), currentNotification: \(currentNotification?.message ?? "nil")")
-        
         // Cancel any existing dismiss task
         dismissTask?.cancel()
         
         currentNotification = notification
         isShowingNotification = true
-        print("🔔 GlobalNotificationHandler: Updated state - isShowing: \(isShowingNotification)")
         
         // Auto-dismiss after duration
         dismissTask = Task { [weak self] in
@@ -98,7 +92,6 @@ final class GlobalNotificationHandler: GlobalNotificationHandlerProtocol, Observ
             
             await MainActor.run { [weak self] in
                 if !Task.isCancelled {
-                    print("🔔 GlobalNotificationHandler: Auto-dismissing notification")
                     self?.dismissNotification()
                 }
             }

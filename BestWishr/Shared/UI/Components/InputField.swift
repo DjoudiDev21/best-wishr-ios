@@ -53,29 +53,52 @@ enum InputType {
     #endif
 }
 
-struct InputField: View {
+struct InputField<FocusValue: Hashable>: View {
     let placeholder: String
     @Binding var text: String
     var isSecure: Bool = false
     var inputType: InputType = .text
+    var focusBinding: FocusState<FocusValue?>.Binding?
+    var focusValue: FocusValue?
     @State private var isPasswordVisible: Bool = false
     
     var body: some View {
         HStack {
             Group {
                 if isSecure && !isPasswordVisible {
-                    SecureField(placeholder, text: $text)
-                        .textFieldStyle(CompactTextFieldStyle())
+                    if let focusBinding = focusBinding, let focusValue = focusValue {
+                        SecureField(placeholder, text: $text)
+                            .textFieldStyle(CompactTextFieldStyle())
+                            .focused(focusBinding, equals: focusValue)
+                    } else {
+                        SecureField(placeholder, text: $text)
+                            .textFieldStyle(CompactTextFieldStyle())
+                    }
                 } else {
                     #if os(iOS)
-                    TextField(placeholder, text: $text)
-                        .textFieldStyle(CompactTextFieldStyle())
-                        .keyboardType(inputType.keyboardType)
-                        .textContentType(inputType.textContentType)
-                        .autocapitalization(inputType.autocapitalizationType)
+                    if let focusBinding = focusBinding, let focusValue = focusValue {
+                        TextField(placeholder, text: $text)
+                            .textFieldStyle(CompactTextFieldStyle())
+                            .keyboardType(inputType.keyboardType)
+                            .textContentType(inputType.textContentType)
+                            .autocapitalization(inputType.autocapitalizationType)
+                            .focused(focusBinding, equals: focusValue)
+                    } else {
+                        TextField(placeholder, text: $text)
+                            .textFieldStyle(CompactTextFieldStyle())
+                            .keyboardType(inputType.keyboardType)
+                            .textContentType(inputType.textContentType)
+                            .autocapitalization(inputType.autocapitalizationType)
+                    }
                     #else
-                    TextField(placeholder, text: $text)
-                        .textFieldStyle(CompactTextFieldStyle())
+                    if let focusBinding = focusBinding, let focusValue = focusValue {
+                        TextField(placeholder, text: $text)
+                            .textFieldStyle(CompactTextFieldStyle())
+                            .focused(focusBinding, equals: focusValue)
+                    } else {
+                        TextField(placeholder, text: $text)
+                            .textFieldStyle(CompactTextFieldStyle())
+                    }
                     #endif
                 }
             }
@@ -96,12 +119,12 @@ struct InputField: View {
 
 #Preview {
     VStack(spacing: 20) {
-        InputField(
+        InputField<String>(
             placeholder: "Enter your email",
             text: .constant("")
         )
         
-        InputField(
+        InputField<String>(
             placeholder: "Enter your password",
             text: .constant(""),
             isSecure: true

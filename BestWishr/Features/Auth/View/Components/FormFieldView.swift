@@ -1,12 +1,14 @@
 import SwiftUI
 
-struct FormFieldView: View {
+struct FormFieldView<FocusValue: Hashable>: View {
     let title: String
     let placeholder: String
     @Binding var text: String
     var isSecure: Bool = false
     var inputType: InputType = .text
     var trailingButton: FormFieldTrailingButton? = nil
+    var focusBinding: FocusState<FocusValue?>.Binding?
+    var focusValue: FocusValue?
     
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -26,11 +28,13 @@ struct FormFieldView: View {
                 }
             }
             
-            InputField(
+            InputField<FocusValue>(
                 placeholder: placeholder,
                 text: $text,
                 isSecure: isSecure,
-                inputType: inputType
+                inputType: inputType,
+                focusBinding: focusBinding,
+                focusValue: focusValue
             )
         }
     }
@@ -43,14 +47,14 @@ struct FormFieldTrailingButton {
 
 #Preview {
     VStack(spacing: 20) {
-        FormFieldView(
+        FormFieldView<String>(
             title: "Email",
             placeholder: "you@example.com",
             text: .constant(""),
             inputType: .email
         )
         
-        FormFieldView(
+        FormFieldView<String>(
             title: "Password",
             placeholder: "Enter your password",
             text: .constant(""),

@@ -38,34 +38,34 @@ struct RegisterFormView: View {
                     )
                 
                 HStack(spacing: 12) {
-                    FormFieldView(
+                    FormFieldView<String>(
                         title: "First Name",
                         placeholder: "John",
                         text: $firstName
                     )
                     
-                    FormFieldView(
+                    FormFieldView<String>(
                         title: "Last Name",
                         placeholder: "Doe",
                         text: $lastName
                     )
                 }
                 
-                FormFieldView(
+                FormFieldView<String>(
                     title: "Email",
                     placeholder: "you@example.com",
                     text: $email,
                     inputType: .email
                 )
                 
-                FormFieldView(
+                FormFieldView<String>(
                     title: "Password",
                     placeholder: "Enter your password",
                     text: $password,
                     isSecure: true
                 )
                 
-                FormFieldView(
+                FormFieldView<String>(
                     title: "Confirm Password",
                     placeholder: "Confirm your password",
                     text: $confirmPassword,

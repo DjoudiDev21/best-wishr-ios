@@ -30,9 +30,7 @@ class AuthPresenter: AuthPresenterProtocol {
     }
     
     func performResendVerificationEmail(email: String) async -> Result<Void, Error> {
-        print("📧 AuthPresenter: performResendVerificationEmail() called with email: '\(email)'")
         let result = await resendVerificationUseCase.execute(email: email)
-        print("📧 AuthPresenter: resendVerificationUseCase.execute() returned: \(result)")
         return result
     }
     

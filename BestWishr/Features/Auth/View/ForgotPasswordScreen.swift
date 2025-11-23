@@ -61,7 +61,7 @@ struct ForgotPasswordScreen: View {
                                     )
                                 )
                             
-                            FormFieldView(
+                            FormFieldView<String>(
                                 title: "Email",
                                 placeholder: "you@example.com",
                                 text: $email,

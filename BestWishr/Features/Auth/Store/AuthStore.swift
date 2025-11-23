@@ -42,7 +42,7 @@ final class AuthStore: ObservableObject {
         case .success(let session):
             handleLoginSuccess(session)
         case .failure(let loginError):
-            handleLoginFailure(loginError)
+            handleLoginFailure(loginError, email: email)
         }
 
         isLoading = false
@@ -58,7 +58,7 @@ final class AuthStore: ObservableObject {
             let successMessage = "Account created! Please check your email to verify before logging in."
             notificationHandler.showSuccess(successMessage)
         case .failure(let error):
-            handleLoginFailure(error)
+            handleLoginFailure(error, email: email)
         }
 
         isLoading = false
@@ -69,7 +69,6 @@ final class AuthStore: ObservableObject {
         
         // Store email for potential verification banner
         emailForVerificationResend = email
-        print("📧 AuthStore: verifyEmailAndLogin() - stored emailForVerificationResend: '\(emailForVerificationResend)'")
         
         // Verify email and get user data with auth token
         let verificationResult = await presenter.performEmailVerification(token: token)
@@ -122,32 +121,26 @@ final class AuthStore: ObservableObject {
         case .success(let session):
             handleLoginSuccess(session)
         case .failure(let error):
-            handleLoginFailure(error)
+            handleLoginFailure(error, email: nil)
         }
         
         isLoading = false
     }
     
     func resendVerificationEmail(email: String) async {
-        print("📧 AuthStore: resendVerificationEmail() called with email: '\(email)'")
         isResendingVerification = true
-        print("📧 AuthStore: Resend loading state set to true")
         
         let result = await presenter.performResendVerificationEmail(email: email)
-        print("📧 AuthStore: Received result from presenter: \(result)")
         
         switch result {
         case .success:
-            let successMessage = "Verification email sent! Please check your inbox."
-            print("✅ AuthStore: Resend successful, showing success message")
-            notificationHandler.showSuccess(successMessage)
+            print("✅ AuthStore: Resend successful")
+            // Success feedback is now handled by the header banner UI
         case .failure(let error):
-            print("❌ AuthStore: Resend failed with error: \(error)")
             errorHandler.handle(error)
         }
         
         isResendingVerification = false
-        print("📧 AuthStore: Resend loading state set to false")
     }
     
     func logout() {
@@ -165,12 +158,21 @@ final class AuthStore: ObservableObject {
         updateAuthState()
     }
 
-    private func handleLoginFailure(_ error: Error) {
+    private func handleLoginFailure(_ error: Error, email: String?) {
         // Check if error is specifically due to unverified email
         let isUnverifiedEmailError = isUnverifiedEmailError(error)
         lastLoginFailedDueToUnverifiedEmail = isUnverifiedEmailError
         
-        errorHandler.handle(error)
+        if isUnverifiedEmailError {
+            // Store email for verification banner
+            if let email = email {
+                emailForVerificationResend = email
+            }
+        } else {
+            // For other login errors (wrong password, network issues, etc.), show regular error alert
+            errorHandler.handle(error)
+        }
+        
         self.user = nil
         self.tokens = nil
         updateAuthState()

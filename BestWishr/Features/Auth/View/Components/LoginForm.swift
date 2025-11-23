@@ -6,23 +6,15 @@ struct LoginForm: View {
     let onSignUpTap: () -> Void
     let onForgotPasswordTap: () -> Void
     
+    @FocusState private var focusedField: LoginField?
+    
+    enum LoginField {
+        case email
+        case password
+    }
+    
     var body: some View {
         VStack(spacing: 16) {
-            if viewModel.needsEmailVerification {
-                VerificationBanner(
-                    email: viewModel.emailForResend,
-                    onResend: { email in
-                        print("🔄 LoginForm: VerificationBanner onResend callback received for email: '\(email)'")
-                        viewModel.resendVerificationEmail()
-                        print("🔄 LoginForm: viewModel.resendVerificationEmail() call completed")
-                    },
-                    onDismiss: {
-                        print("❌ LoginForm: VerificationBanner onDismiss callback received")
-                        viewModel.dismissVerificationBanner()
-                    },
-                    isLoading: store.isResendingVerification
-                )
-            }
             
             VStack(alignment: .leading, spacing: 16) {
                 Text("Welcome Back!")
@@ -38,14 +30,16 @@ struct LoginForm: View {
                         )
                     )
                 
-                FormFieldView(
+                FormFieldView<LoginField>(
                     title: "Email",
                     placeholder: "you@example.com",
                     text: $viewModel.email,
-                    inputType: .email
+                    inputType: .email,
+                    focusBinding: $focusedField,
+                    focusValue: LoginField.email
                 )
                 
-                FormFieldView(
+                FormFieldView<LoginField>(
                     title: "Password",
                     placeholder: "Enter your password",
                     text: $viewModel.password,
@@ -53,12 +47,17 @@ struct LoginForm: View {
                     trailingButton: FormFieldTrailingButton(
                         title: "Forgot?",
                         action: onForgotPasswordTap
-                    )
+                    ),
+                    focusBinding: $focusedField,
+                    focusValue: LoginField.password
                 )
                 
                 SubmitButton(
                     title: "Sign In",
                     action: {
+                        // Dismiss keyboard before submitting
+                        focusedField = nil
+                        
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
                             viewModel.login()
                         }
@@ -93,5 +92,19 @@ struct LoginForm: View {
             SignUpPrompt(action: onSignUpTap)
         }
         .padding(.horizontal, 24)
+        .onSubmit {
+            // Handle return key submission
+            if focusedField == .email {
+                focusedField = .password
+            } else if focusedField == .password {
+                // Dismiss keyboard and submit form
+                focusedField = nil
+                if !viewModel.isButtonDisabled {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                        viewModel.login()
+                    }
+                }
+            }
+        }
     }
 }

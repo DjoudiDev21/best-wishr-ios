@@ -1,9 +1,15 @@
 import SwiftUI
+import Combine
 
 struct ErrorHandler: ViewModifier {
     @ObservedObject private var errorHandler = GlobalErrorHandler.shared
+    @ObservedObject private var resendCenter = ResendNotificationCenter.shared
     @State private var showToast = false
     @State private var toastMessage = ""
+    @State private var showBanner = false
+    @State private var bannerEmail = ""
+    @State private var bannerIsLoading = false
+    private var cancellables = Set<AnyCancellable>()
     
     func body(content: Content) -> some View {
         content
@@ -25,6 +31,35 @@ struct ErrorHandler: ViewModifier {
             .onReceive(errorHandler.errorSubject) { presentation in
                 handleErrorPresentation(presentation)
             }
+            .onReceive(resendCenter.dismissPublisher) { _ in
+                withAnimation(.spring()) {
+                    showBanner = false
+                }
+            }
+            .overlay(
+                // Header banner overlay
+                VStack {
+                    if showBanner {
+                        HeaderVerificationBanner(
+                            email: bannerEmail,
+                            onResend: { email in
+                                handleBannerResend(email: email)
+                            },
+                            onDismiss: {
+                                withAnimation {
+                                    showBanner = false
+                                }
+                            },
+                            isLoading: resendCenter.isLoading,
+                            isSuccess: resendCenter.isSuccess
+                        )
+                    }
+                    
+                    Spacer()
+                }
+                .allowsHitTesting(showBanner), 
+                alignment: .top
+            )
             .overlay(
                 // Toast overlay
                 Group {
@@ -70,9 +105,14 @@ struct ErrorHandler: ViewModifier {
             break
             
         case .banner:
-            // Banner errors are handled by specific UI components (like verification banner)
-            // No additional UI needed here as the banner is shown in LoginForm
-            break
+            // Extract email from context for verification banner
+            if let context = presentation.context,
+               let email = context["email"] as? String {
+                bannerEmail = email
+                withAnimation(.spring()) {
+                    showBanner = true
+                }
+            }
             
         case .toast:
             toastMessage = presentation.error.userFriendlyMessage
@@ -91,6 +131,10 @@ struct ErrorHandler: ViewModifier {
             // Silent errors don't show any UI
             break
         }
+    }
+    
+    private func handleBannerResend(email: String) {
+        ResendNotificationCenter.shared.requestResend(email: email)
     }
 }
 

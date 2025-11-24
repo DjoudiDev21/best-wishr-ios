@@ -166,7 +166,7 @@ struct SettingsTabView: View {
     }
     
     private func logout() async {
-        appStore.authStore.logout()
+        await appStore.authStore.logout()
     }
 }
 

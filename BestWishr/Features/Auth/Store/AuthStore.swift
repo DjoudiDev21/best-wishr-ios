@@ -133,9 +133,6 @@ final class AuthStore: ObservableObject {
         let result = await presenter.performResendVerificationEmail(email: email)
         
         switch result {
-        case .success:
-            print("✅ AuthStore: Resend successful")
-            // Success feedback is now handled by the header banner UI
         case .failure(let error):
             errorHandler.handle(error)
         }
@@ -143,10 +140,26 @@ final class AuthStore: ObservableObject {
         isResendingVerification = false
     }
     
-    func logout() {
+    func logout() async {
+        // Get refresh token before clearing state
+        let refreshToken = tokens?.refreshToken ?? ""
+
+        // Clear local authentication state immediately for better UX
         user = nil
         tokens = nil
+        lastLoginFailedDueToUnverifiedEmail = false
+        emailForVerificationResend = ""
         updateAuthState()
+
+        // Perform backend logout in background without showing loading state
+        // Only make the call if we have a refresh token
+        if !refreshToken.isEmpty {
+            Task {
+                // Fire and forget - user is already logged out locally
+                // Backend call success/failure doesn't affect user experience
+                await presenter.performLogout(refreshToken: refreshToken)
+            }
+        }
     }
     
     // MARK: - Private Helpers
@@ -243,7 +256,6 @@ final class AuthStore: ObservableObject {
         
         // Show verification banner for expired/invalid tokens
         if shouldShowVerificationBanner {
-            print("📧 AuthStore: Setting up verification banner with emailForVerificationResend: '\(emailForVerificationResend)'")
             lastLoginFailedDueToUnverifiedEmail = true
             // Use banner presentation mode for verification errors
             errorHandler.handle(

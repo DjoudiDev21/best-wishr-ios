@@ -60,19 +60,26 @@ final class HttpClient: HttpClientProtocol {
     }
     
     func postVoid<U: Encodable>(_ endpoint: ApiEndpoint, body: U) async throws {
+        print("🌐 HttpClient.postVoid: Starting request to endpoint: \(endpoint)")
         var request = try endpoint.makeRequest(baseURL: baseURL)
+        print("🌐 HttpClient.postVoid: Request URL: \(request.url?.absoluteString ?? "nil")")
         request.httpMethod = "POST"
         request.httpBody = try JSONEncoder().encode(body)
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        print("🌐 HttpClient.postVoid: Set headers and body")
         
         if let bodyData = request.httpBody, let bodyString = String(data: bodyData, encoding: .utf8) {
             print("📤 Body: \(bodyString)")
         }
         
+        print("🌐 HttpClient.postVoid: Making URLSession.data request")
         do {
             let (data, response) = try await session.data(for: request)
+            print("🌐 HttpClient.postVoid: Received response")
             try validateResponse(response: response, data: data)
+            print("✅ HttpClient.postVoid: Request completed successfully")
         } catch {
+            print("❌ HttpClient.postVoid: Request failed with error: \(error)")
             throw error
         }
     }

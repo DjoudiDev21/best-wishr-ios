@@ -5,6 +5,7 @@ enum ApiEndpoint {
     case authRegister
     case authVerifyEmail
     case authSendEmailVerification
+    case authLogout
     case appleAuth
     case authSocialMobile
     
@@ -26,6 +27,7 @@ enum ApiEndpoint {
         case .authRegister: return "auth/register"
         case .authVerifyEmail: return "auth/verify-email"
         case .authSendEmailVerification: return "auth/send-email-verification"
+        case .authLogout: return "auth/logout/mobile"
         case .appleAuth: return "auth/social/apple-signin"
         case .authSocialMobile: return "auth/social/mobile"
         }
@@ -33,7 +35,7 @@ enum ApiEndpoint {
 
     private var method: String {
         switch self {
-        case .authLogin, .authRegister, .authVerifyEmail, .authSendEmailVerification, .appleAuth, .authSocialMobile: return "POST"
+        case .authLogin, .authRegister, .authVerifyEmail, .authSendEmailVerification, .authLogout, .appleAuth, .authSocialMobile: return "POST"
         }
     }
 

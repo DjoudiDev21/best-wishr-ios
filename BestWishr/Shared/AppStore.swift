@@ -18,6 +18,7 @@ final class AppStore: ObservableObject {
         let registerUseCase = RegisterUseCase(repository: authRepository)
         let verifyEmailUseCase = VerifyEmailUseCase(repository: authRepository)
         let resendVerificationUseCase = ResendVerificationUseCase(repository: authRepository)
+        let logoutUseCase = LogoutUseCase(repository: authRepository)
         let forgotPasswordUseCase = ForgotPasswordUseCase(repository: authRepository)
         let appleAuthUseCase = AppleAuthUseCase(repository: authRepository)
         let authPresenter = AuthPresenter(
@@ -25,6 +26,7 @@ final class AppStore: ObservableObject {
             registerUseCase: registerUseCase,
             verifyEmailUseCase: verifyEmailUseCase,
             resendVerificationUseCase: resendVerificationUseCase,
+            logoutUseCase: logoutUseCase,
             forgotPasswordUseCase: forgotPasswordUseCase,
             appleAuthUseCase: appleAuthUseCase
         )

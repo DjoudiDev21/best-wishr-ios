@@ -5,14 +5,16 @@ class AuthPresenter: AuthPresenterProtocol {
     private let registerUseCase: RegisterUseCase
     private let verifyEmailUseCase: VerifyEmailUseCase
     private let resendVerificationUseCase: ResendVerificationUseCase
+    private let logoutUseCase: LogoutUseCase
     private let forgotPasswordUseCase: ForgotPasswordUseCase
     private let appleAuthUseCase: AppleAuthUseCase
     
-    init(loginUseCase: LoginUseCase, registerUseCase: RegisterUseCase, verifyEmailUseCase: VerifyEmailUseCase, resendVerificationUseCase: ResendVerificationUseCase, forgotPasswordUseCase: ForgotPasswordUseCase, appleAuthUseCase: AppleAuthUseCase) {
+    init(loginUseCase: LoginUseCase, registerUseCase: RegisterUseCase, verifyEmailUseCase: VerifyEmailUseCase, resendVerificationUseCase: ResendVerificationUseCase, logoutUseCase: LogoutUseCase, forgotPasswordUseCase: ForgotPasswordUseCase, appleAuthUseCase: AppleAuthUseCase) {
         self.loginUseCase = loginUseCase
         self.registerUseCase = registerUseCase
         self.verifyEmailUseCase = verifyEmailUseCase
         self.resendVerificationUseCase = resendVerificationUseCase
+        self.logoutUseCase = logoutUseCase
         self.forgotPasswordUseCase = forgotPasswordUseCase
         self.appleAuthUseCase = appleAuthUseCase
     }
@@ -31,6 +33,11 @@ class AuthPresenter: AuthPresenterProtocol {
     
     func performResendVerificationEmail(email: String) async -> Result<Void, Error> {
         let result = await resendVerificationUseCase.execute(email: email)
+        return result
+    }
+    
+    func performLogout(refreshToken: String) async -> Result<Void, Error> {
+        let result = await logoutUseCase.execute(refreshToken: refreshToken)
         return result
     }
     

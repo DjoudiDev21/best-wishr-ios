@@ -59,14 +59,19 @@ final class HttpAuthRepository: AuthRepositoryProtocol {
     }
     
     func resendVerificationEmail(email: String) async throws {
-        print("📧 AuthRepository: Resending verification email to: \(email)")
-        
         let body = SendEmailVerificationDto(email: email)
         do {
             let response: ResendVerificationResponseDto = try await httpClient.post(.authSendEmailVerification, body: body)
-            print("✅ AuthRepository: Verification email sent successfully - \(response.message)")
         } catch {
-            print("❌ AuthRepository: Failed to send verification email: \(error)")
+            throw error
+        }
+    }
+    
+    func logout(refreshToken: String) async throws {
+        let body = MobileLogoutDto(refreshToken: refreshToken)
+        do {
+            try await httpClient.postVoid(.authLogout, body: body)
+        } catch {
             throw error
         }
     }

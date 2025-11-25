@@ -1,5 +1,12 @@
 import Foundation
 
+enum BannerErrorType: String, CaseIterable {
+    case emailVerification = "emailVerification"
+    case forgotPassword = "forgotPassword"
+    case loginUnverified = "loginUnverified"
+    case verificationExpired = "verificationExpired"
+}
+
 enum AppError: Error {
     case network(String)
     case authentication(String)

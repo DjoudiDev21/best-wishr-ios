@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct LoginForm: View {
+struct LoginFormView: View {
     @ObservedObject var viewModel: LoginViewModel
     @ObservedObject var store: AuthStore
     let onSignUpTap: () -> Void

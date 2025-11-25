@@ -7,8 +7,7 @@ struct ErrorHandler: ViewModifier {
     @State private var showToast = false
     @State private var toastMessage = ""
     @State private var showBanner = false
-    @State private var bannerEmail = ""
-    @State private var bannerIsLoading = false
+    @State private var emailBannerType: ResendEmailType?
     private var cancellables = Set<AnyCancellable>()
     
     func body(content: Content) -> some View {
@@ -39,11 +38,11 @@ struct ErrorHandler: ViewModifier {
             .overlay(
                 // Header banner overlay
                 VStack {
-                    if showBanner {
-                        HeaderVerificationBanner(
-                            email: bannerEmail,
-                            onResend: { email in
-                                handleBannerResend(email: email)
+                    if showBanner, let emailType = emailBannerType {
+                        ResendEmailBannerView(
+                            emailType: emailType,
+                            onAction: { emailType in
+                                handleBannerAction(emailType: emailType)
                             },
                             onDismiss: {
                                 withAnimation {
@@ -99,20 +98,17 @@ struct ErrorHandler: ViewModifier {
     }
     
     private func handleErrorPresentation(_ presentation: ErrorPresentation) {
+        print("🔔 ErrorHandler: handleErrorPresentation called with mode: \(presentation.mode)")
+        
         switch presentation.mode {
         case .alert:
+            print("🔔 ErrorHandler: Showing alert for error: \(presentation.error)")
             // Already handled by the alert modifier above
             break
             
         case .banner:
-            // Extract email from context for verification banner
-            if let context = presentation.context,
-               let email = context["email"] as? String {
-                bannerEmail = email
-                withAnimation(.spring()) {
-                    showBanner = true
-                }
-            }
+            print("🔔 ErrorHandler: Processing banner request")
+            handleBannerPresentation(presentation)
             
         case .toast:
             toastMessage = presentation.error.userFriendlyMessage
@@ -133,8 +129,40 @@ struct ErrorHandler: ViewModifier {
         }
     }
     
-    private func handleBannerResend(email: String) {
-        ResendNotificationCenter.shared.requestResend(email: email)
+    private func handleBannerPresentation(_ presentation: ErrorPresentation) {
+        guard let context = presentation.context,
+              let email = context["email"] as? String,
+              let bannerErrorType = context["errorType"] as? BannerErrorType else {
+            print("❌ ErrorHandler: Missing required context - email or errorType: \(presentation.context ?? [:])")
+            return
+        }
+        
+        print("🔔 ErrorHandler: Found email in context: \(email)")
+        
+        emailBannerType = createResendEmailType(from: bannerErrorType, email: email)
+        
+        withAnimation(.spring()) {
+            print("🔔 ErrorHandler: Showing banner for email: \(email)")
+            showBanner = true
+        }
+    }
+    
+    private func createResendEmailType(from bannerErrorType: BannerErrorType, email: String) -> ResendEmailType {
+        switch bannerErrorType {
+        case .forgotPassword:
+            return .forgotPassword(email: email)
+        case .emailVerification, .loginUnverified, .verificationExpired:
+            return .emailVerification(email: email)
+        }
+    }
+    
+    private func handleBannerAction(emailType: ResendEmailType) {
+        switch emailType {
+        case .emailVerification(let email):
+            ResendNotificationCenter.shared.requestResend(.emailVerification(email: email))
+        case .forgotPassword(let email):
+            ResendNotificationCenter.shared.requestResend(.forgotPassword(email: email))
+        }
     }
 }
 

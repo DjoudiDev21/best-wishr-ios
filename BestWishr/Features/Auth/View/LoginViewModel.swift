@@ -6,7 +6,6 @@ final class LoginViewModel: ObservableObject {
     @Published var password = ""
     @Published var isButtonDisabled = true
     @Published var needsEmailVerification = false
-    @Published var emailForResend = ""
     
     private let store: AuthStore
     private var cancellables = Set<AnyCancellable>()
@@ -34,15 +33,14 @@ final class LoginViewModel: ObservableObject {
         }
     }
     
-    func resendVerificationEmail() {
-        guard !emailForResend.isEmpty else {
-            return
-        }
+    func resendVerificationEmail(email: String) {
+        guard !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        guard !store.isResendingVerification else { return }
         
         Task {
             ResendNotificationCenter.shared.setLoading(true)
             ResendNotificationCenter.shared.setSuccess(false)
-            await store.resendVerificationEmail(email: emailForResend)
+            await store.resendVerificationEmail(email: email)
             ResendNotificationCenter.shared.setLoading(false)
             ResendNotificationCenter.shared.setSuccess(true)
         }
@@ -50,7 +48,6 @@ final class LoginViewModel: ObservableObject {
     
     func dismissVerificationBanner() {
         needsEmailVerification = false
-        emailForResend = ""
     }
     
     private func observeAuthState() {
@@ -62,37 +59,16 @@ final class LoginViewModel: ObservableObject {
                 }
             }
             .store(in: &cancellables)
-        
-        store.$lastLoginFailedDueToUnverifiedEmail
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] needsVerification in
-                if needsVerification {
-                    self?.checkIfVerificationNeeded()
-                }
-            }
-            .store(in: &cancellables)
     }
     
-    @MainActor
-    private func checkIfVerificationNeeded() {
-        needsEmailVerification = true
-        
-        // Use email from store (extracted from verification URL)
-        emailForResend = store.emailForVerificationResend.trimmingCharacters(in: .whitespacesAndNewlines)
-        
-        // Trigger global header banner
-        GlobalErrorHandler.shared.handle(
-            .authentication("Email verification required"),
-            presentationMode: .banner,
-            context: ["email": emailForResend]
-        )
-    }
     
     private func observeResendNotifications() {
         ResendNotificationCenter.shared.resendPublisher
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] email in
-                self?.resendVerificationEmail()
+            .sink { [weak self] requestType in
+                if case .emailVerification(let email) = requestType {
+                    self?.resendVerificationEmail(email: email)
+                }
             }
             .store(in: &cancellables)
     }

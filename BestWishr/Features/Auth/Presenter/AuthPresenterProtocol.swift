@@ -7,5 +7,6 @@ protocol AuthPresenterProtocol {
      func performResendVerificationEmail(email: String) async -> Result<Void, Error>
      func performLogout(refreshToken: String) async -> Result<Void, Error>
      func performForgotPassword(email: String) async -> Result<Void, Error>
+     func performResetPassword(token: String, newPassword: String) async -> Result<Void, Error>
      func performAppleAuth(request: AppleAuthRequestDto) async -> Result<AuthSession, Error>
  }

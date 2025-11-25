@@ -7,15 +7,17 @@ class AuthPresenter: AuthPresenterProtocol {
     private let resendVerificationUseCase: ResendVerificationUseCase
     private let logoutUseCase: LogoutUseCase
     private let forgotPasswordUseCase: ForgotPasswordUseCase
+    private let resetPasswordUseCase: ResetPasswordUseCase
     private let appleAuthUseCase: AppleAuthUseCase
     
-    init(loginUseCase: LoginUseCase, registerUseCase: RegisterUseCase, verifyEmailUseCase: VerifyEmailUseCase, resendVerificationUseCase: ResendVerificationUseCase, logoutUseCase: LogoutUseCase, forgotPasswordUseCase: ForgotPasswordUseCase, appleAuthUseCase: AppleAuthUseCase) {
+    init(loginUseCase: LoginUseCase, registerUseCase: RegisterUseCase, verifyEmailUseCase: VerifyEmailUseCase, resendVerificationUseCase: ResendVerificationUseCase, logoutUseCase: LogoutUseCase, forgotPasswordUseCase: ForgotPasswordUseCase, resetPasswordUseCase: ResetPasswordUseCase, appleAuthUseCase: AppleAuthUseCase) {
         self.loginUseCase = loginUseCase
         self.registerUseCase = registerUseCase
         self.verifyEmailUseCase = verifyEmailUseCase
         self.resendVerificationUseCase = resendVerificationUseCase
         self.logoutUseCase = logoutUseCase
         self.forgotPasswordUseCase = forgotPasswordUseCase
+        self.resetPasswordUseCase = resetPasswordUseCase
         self.appleAuthUseCase = appleAuthUseCase
     }
 
@@ -43,6 +45,10 @@ class AuthPresenter: AuthPresenterProtocol {
     
     func performForgotPassword(email: String) async -> Result<Void, Error> {
         await forgotPasswordUseCase.execute(email: email)
+    }
+    
+    func performResetPassword(token: String, newPassword: String) async -> Result<Void, Error> {
+        await resetPasswordUseCase.execute(token: token, newPassword: newPassword)
     }
     
     func performAppleAuth(request: AppleAuthRequestDto) async -> Result<AuthSession, Error> {

@@ -1,16 +1,29 @@
 import Foundation
 import Combine
 
+enum ResendRequestType {
+    case emailVerification(email: String)
+    case forgotPassword(email: String)
+    
+    var email: String {
+        switch self {
+        case .emailVerification(let email),
+             .forgotPassword(let email):
+            return email
+        }
+    }
+}
+
 class ResendNotificationCenter: ObservableObject {
     static let shared = ResendNotificationCenter()
     
     @Published var isLoading = false
     @Published var isSuccess = false
     
-    private let resendSubject = PassthroughSubject<String, Never>()
+    private let resendSubject = PassthroughSubject<ResendRequestType, Never>()
     private let dismissSubject = PassthroughSubject<Void, Never>()
     
-    var resendPublisher: AnyPublisher<String, Never> {
+    var resendPublisher: AnyPublisher<ResendRequestType, Never> {
         resendSubject.eraseToAnyPublisher()
     }
     
@@ -20,8 +33,13 @@ class ResendNotificationCenter: ObservableObject {
     
     private init() {}
     
+    func requestResend(_ requestType: ResendRequestType) {
+        resendSubject.send(requestType)
+    }
+    
+    // Convenience method for backward compatibility
     func requestResend(email: String) {
-        resendSubject.send(email)
+        resendSubject.send(.emailVerification(email: email))
     }
     
     func setLoading(_ loading: Bool) {

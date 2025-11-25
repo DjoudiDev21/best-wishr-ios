@@ -3,7 +3,10 @@ import SwiftUI
 struct LoginScreen: View {
     @ObservedObject var loginViewModel: LoginViewModel
     @ObservedObject var registerViewModel: RegisterViewModel
-    @ObservedObject var store: AuthStore
+    @ObservedObject var forgotPasswordViewModel: ForgotPasswordViewModel
+    @ObservedObject var resetPasswordViewModel: ResetPasswordViewModel
+    @ObservedObject var authStore: AuthStore
+    @EnvironmentObject var urlManager: URLManager
     @State private var showRegister = false
     @State private var showForgotPassword = false
     @State private var isAnimating = false
@@ -31,9 +34,9 @@ struct LoginScreen: View {
                 .frame(maxHeight: 200)
                 
                 VStack(spacing: 0) {
-                    LoginForm(
+                    LoginFormView(
                         viewModel: loginViewModel,
-                        store: store,
+                        store: authStore,
                         onSignUpTap: { showRegister = true },
                         onForgotPasswordTap: { showForgotPassword = true }
                     )
@@ -43,10 +46,24 @@ struct LoginScreen: View {
             }
         }
         .sheet(isPresented: $showRegister) {
-            RegisterScreen(viewModel: registerViewModel, store: store)
+            RegisterScreen(viewModel: registerViewModel, store: authStore)
         }
         .sheet(isPresented: $showForgotPassword) {
-            ForgotPasswordScreen()
+            ForgotPasswordScreen(
+                viewModel: forgotPasswordViewModel,
+                store: authStore
+            )
+        }
+        .sheet(isPresented: $urlManager.shouldShowResetPassword) {
+            ResetPasswordScreen(
+                viewModel: resetPasswordViewModel,
+                store: authStore
+            )
+        }
+        .onReceive(urlManager.$activeDestination) { destination in
+            if case .resetPassword(_, _) = destination {
+                urlManager.setResetPasswordMode(true)
+            }
         }
         .onAppear {
             withAnimation(.easeInOut(duration: 1)) {
@@ -57,25 +74,4 @@ struct LoginScreen: View {
             }
         }
     }
-}
-
-#Preview("Login – Placeholder") {
-    // Minimal placeholder preview to keep builds green while underlying types are unavailable
-    VStack(spacing: 12) {
-        Text("Login Preview Unavailable")
-            .font(.headline)
-        Text("Provide preview stubs for AuthViewModel and AuthStore or run the app.")
-            .font(.subheadline)
-            .foregroundStyle(.secondary)
-        // Optional: a rough layout echo so designers can still see spacing
-        VStack {
-            TextField("Email", text: .constant(""))
-            SecureField("Password", text: .constant(""))
-            Button("Login") {}
-                .disabled(true)
-        }
-        .textFieldStyle(.roundedBorder)
-        .padding()
-    }
-    .padding()
 }

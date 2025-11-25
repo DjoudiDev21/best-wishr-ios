@@ -1,8 +1,9 @@
 import SwiftUI
 
-struct ForgotPasswordScreen: View {
-    @ObservedObject var viewModel: ForgotPasswordViewModel
+struct ResetPasswordScreen: View {
+    @ObservedObject var viewModel: ResetPasswordViewModel
     @ObservedObject var store: AuthStore
+    @EnvironmentObject var urlManager: URLManager
     @Environment(\.dismiss) private var dismiss
     @State private var isAnimating = false
     @State private var showFloatingIcons = false
@@ -36,7 +37,7 @@ struct ForgotPasswordScreen: View {
                                 )
                             )
                         
-                        Text("Enter your email to receive reset instructions")
+                        Text("Enter your new password")
                             .font(.system(size: 14, weight: .medium, design: .rounded))
                             .foregroundColor(Color(red: 0.45, green: 0.3, blue: 0.6))
                             .multilineTextAlignment(.center)
@@ -47,13 +48,24 @@ struct ForgotPasswordScreen: View {
                 .frame(maxHeight: 200)
                 
                 VStack(spacing: 0) {
-                    ForgotPasswordFormView(
-                        email: $viewModel.email,
+                    ResetPasswordFormView(
+                        newPassword: Binding(
+                            get: { viewModel.newPassword },
+                            set: { viewModel.newPassword = $0 }
+                        ),
+                        confirmPassword: Binding(
+                            get: { viewModel.confirmPassword },
+                            set: { viewModel.confirmPassword = $0 }
+                        ),
                         isLoading: .constant(store.isLoading),
-                        onSendInstructions: {
-                            viewModel.sendResetInstructions()
+                        showPasswordMismatchError: viewModel.showPasswordMismatchError,
+                        showPasswordLengthError: viewModel.showPasswordLengthError,
+                        isButtonDisabled: viewModel.isButtonDisabled,
+                        onResetPassword: {
+                            viewModel.resetPassword()
                         },
                         onSignInTap: {
+                            urlManager.clearActiveDestination()
                             dismiss()
                         }
                     )
@@ -73,6 +85,7 @@ struct ForgotPasswordScreen: View {
         }
         .onChange(of: viewModel.shouldDismiss) { _, shouldDismiss in
             if shouldDismiss {
+                urlManager.clearActiveDestination()
                 dismiss()
             }
         }

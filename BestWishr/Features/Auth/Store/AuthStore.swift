@@ -8,7 +8,6 @@ final class AuthStore: ObservableObject {
     @Published private(set) var tokens: AuthTokens? = nil
     @Published private(set) var isLoading = false
     @Published private(set) var isResendingVerification = false
-    @Published private(set) var lastLoginFailedDueToUnverifiedEmail = false
     @Published private(set) var emailForVerificationResend: String = ""
     
     // MARK: - Computed Properties  
@@ -88,19 +87,66 @@ final class AuthStore: ObservableObject {
         }
     }
     
-    func forgotPassword(email: String) async {
+    func forgotPassword(email: String, showToast: Bool = true) async {
         isLoading = true
 
         let result = await presenter.performForgotPassword(email: email)
 
         switch result {
         case .success:
-            break
+            if showToast {
+                notificationHandler.showSuccess("Password reset instructions have been sent to your email")
+            }
         case .failure(let error):
             errorHandler.handle(error)
         }
 
         isLoading = false
+    }
+    
+    func resetPassword(token: String, newPassword: String, email: String? = nil) async {
+        isLoading = true
+
+        let result = await presenter.performResetPassword(token: token, newPassword: newPassword)
+
+        switch result {
+        case .success:
+            notificationHandler.showSuccess("Password has been reset successfully")
+        case .failure(let error):
+            handleResetPasswordError(error, email: email)
+        }
+
+        isLoading = false
+    }
+    
+    private func handleResetPasswordError(_ error: Error, email: String? = nil) {
+        // Check if this is a token-related error that should show banner
+        if isResetPasswordTokenError(error) {
+            let email = email ?? ""
+            errorHandler.handle(
+                AppError.validation("Your reset password link has expired. Please request a new one."),
+                presentationMode: .banner,
+                context: ["email": email, "errorType": BannerErrorType.forgotPassword]
+            )
+        } else {
+            // For other errors (network, validation, etc.), use regular alert
+            errorHandler.handle(error)
+        }
+    }
+    
+    private func isResetPasswordTokenError(_ error: Error) -> Bool {
+        if let appError = error as? AppError {
+            switch appError {
+            case .validation(let message):
+                let lowercased = message.lowercased()
+                return lowercased.contains("invalid") && lowercased.contains("token") ||
+                       lowercased.contains("expired") && lowercased.contains("token") ||
+                       lowercased.contains("reset token")
+            default:
+                return false
+            }
+        }
+        return false
     }
     
     func appleAuth(identityToken: String, authorizationCode: String) async {
@@ -135,6 +181,8 @@ final class AuthStore: ObservableObject {
         switch result {
         case .failure(let error):
             errorHandler.handle(error)
+        case .success():
+            print("toto")
         }
         
         isResendingVerification = false
@@ -147,7 +195,6 @@ final class AuthStore: ObservableObject {
         // Clear local authentication state immediately for better UX
         user = nil
         tokens = nil
-        lastLoginFailedDueToUnverifiedEmail = false
         emailForVerificationResend = ""
         updateAuthState()
 
@@ -166,7 +213,6 @@ final class AuthStore: ObservableObject {
     private func handleLoginSuccess(_ session: AuthSession) {
         self.user = session.user
         self.tokens = session.tokens
-        self.lastLoginFailedDueToUnverifiedEmail = false
         self.emailForVerificationResend = ""
         updateAuthState()
     }
@@ -174,13 +220,18 @@ final class AuthStore: ObservableObject {
     private func handleLoginFailure(_ error: Error, email: String?) {
         // Check if error is specifically due to unverified email
         let isUnverifiedEmailError = isUnverifiedEmailError(error)
-        lastLoginFailedDueToUnverifiedEmail = isUnverifiedEmailError
         
         if isUnverifiedEmailError {
             // Store email for verification banner
             if let email = email {
                 emailForVerificationResend = email
             }
+            // Handle login verification banner directly
+            errorHandler.handle(
+                AppError.authentication("Email verification required"),
+                presentationMode: .banner,
+                context: ["email": emailForVerificationResend, "errorType": BannerErrorType.loginUnverified]
+            )
         } else {
             // For other login errors (wrong password, network issues, etc.), show regular error alert
             errorHandler.handle(error)
@@ -254,14 +305,11 @@ final class AuthStore: ObservableObject {
             }
         }
         
-        // Show verification banner for expired/invalid tokens
         if shouldShowVerificationBanner {
-            lastLoginFailedDueToUnverifiedEmail = true
-            // Use banner presentation mode for verification errors
             errorHandler.handle(
-                AppError.validation(errorMessage), 
-                presentationMode: .banner, 
-                context: ["email": emailForVerificationResend]
+                AppError.validation(errorMessage),
+                presentationMode: .banner,
+                context: ["email": emailForVerificationResend, "errorType": BannerErrorType.verificationExpired]
             )
         } else {
             // Use alert for non-verification errors (network, server, etc.)
@@ -271,6 +319,15 @@ final class AuthStore: ObservableObject {
         self.user = nil
         self.tokens = nil
         updateAuthState()
+    }
+    
+    func handleExpiredVerificationToken(email: String) {
+        // Store email for banner
+        emailForVerificationResend = email
+        
+        // Reuse existing verification failure logic with expired token error
+        let expiredTokenError = AppError.validation("Invalid or expired verification token")
+        handleVerificationFailure(expiredTokenError)
     }
     
     private func updateAuthState() {

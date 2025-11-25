@@ -20,6 +20,7 @@ final class AppStore: ObservableObject {
         let resendVerificationUseCase = ResendVerificationUseCase(repository: authRepository)
         let logoutUseCase = LogoutUseCase(repository: authRepository)
         let forgotPasswordUseCase = ForgotPasswordUseCase(repository: authRepository)
+        let resetPasswordUseCase = ResetPasswordUseCase(repository: authRepository)
         let appleAuthUseCase = AppleAuthUseCase(repository: authRepository)
         let authPresenter = AuthPresenter(
             loginUseCase: loginUseCase,
@@ -28,6 +29,7 @@ final class AppStore: ObservableObject {
             resendVerificationUseCase: resendVerificationUseCase,
             logoutUseCase: logoutUseCase,
             forgotPasswordUseCase: forgotPasswordUseCase,
+            resetPasswordUseCase: resetPasswordUseCase,
             appleAuthUseCase: appleAuthUseCase
         )
         self.authStore = AuthStore(presenter: authPresenter)

@@ -7,5 +7,6 @@ protocol AuthRepositoryProtocol {
     func resendVerificationEmail(email: String) async throws
     func logout(refreshToken: String) async throws
     func forgotPassword(email: String) async throws
+    func resetPassword(token: String, newPassword: String) async throws
     func appleAuth(request: AppleAuthRequestDto) async throws -> AuthSession
 }

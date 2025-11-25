@@ -61,7 +61,7 @@ final class HttpAuthRepository: AuthRepositoryProtocol {
     func resendVerificationEmail(email: String) async throws {
         let body = SendEmailVerificationDto(email: email)
         do {
-            let response: ResendVerificationResponseDto = try await httpClient.post(.authSendEmailVerification, body: body)
+            let _: ResendVerificationResponseDto = try await httpClient.post(.authSendEmailVerification, body: body)
         } catch {
             throw error
         }
@@ -77,8 +77,21 @@ final class HttpAuthRepository: AuthRepositoryProtocol {
     }
     
     func forgotPassword(email: String) async throws {
-        // TODO: Implement when forgot password endpoint is available
-        fatalError("Forgot password endpoint not implemented yet")
+        let body = ForgotPasswordDto(email: email)
+        do {
+            try await httpClient.postVoid(.authForgotPassword, body: body)
+        } catch {
+            throw error
+        }
+    }
+    
+    func resetPassword(token: String, newPassword: String) async throws {
+        let body = ResetPasswordDto(token: token, newPassword: newPassword)
+        do {
+            try await httpClient.postVoid(.authResetPassword, body: body)
+        } catch {
+            throw error
+        }
     }
     
     func appleAuth(request: AppleAuthRequestDto) async throws -> AuthSession {

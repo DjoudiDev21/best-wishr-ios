@@ -5,6 +5,7 @@ enum NotificationType {
     case success
     case info
     case warning
+    case error
 }
 
 struct AppNotification {
@@ -27,6 +28,8 @@ protocol GlobalNotificationHandlerProtocol {
     func showInfo(_ message: String, duration: TimeInterval)
     func showWarning(_ message: String)
     func showWarning(_ message: String, duration: TimeInterval)
+    func showError(_ message: String)
+    func showError(_ message: String, duration: TimeInterval)
 }
 
 final class GlobalNotificationHandler: GlobalNotificationHandlerProtocol, ObservableObject {
@@ -76,6 +79,15 @@ final class GlobalNotificationHandler: GlobalNotificationHandlerProtocol, Observ
     
     func showWarning(_ message: String, duration: TimeInterval) {
         let notification = AppNotification(message: message, type: .warning, duration: duration)
+        notificationSubject.send(notification)
+    }
+    
+    func showError(_ message: String) {
+        showError(message, duration: 4.0)
+    }
+    
+    func showError(_ message: String, duration: TimeInterval) {
+        let notification = AppNotification(message: message, type: .error, duration: duration)
         notificationSubject.send(notification)
     }
     

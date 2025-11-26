@@ -1,17 +1,33 @@
 import Foundation
 
-final class MockContactRepository: ContactRepositoryProtocol {
-    
+final class HttpContactRepository: ContactRepositoryProtocol {
+    private let httpClient: HttpClientProtocol
+    private let userIdProvider: () -> String?
     private var contacts: [Contact] = []
     
-    init() {
-        loadMockData()
+    init(httpClient: HttpClientProtocol, userIdProvider: @escaping () -> String?) {
+        self.httpClient = httpClient
+        self.userIdProvider = userIdProvider
     }
     
     func getContacts() async throws -> [Contact] {
-        // Simulate network delay
-        try await Task.sleep(nanoseconds: 1_500_000_000) // 1.5 seconds
-        return contacts.sorted { $0.firstName < $1.firstName }
+        print("🏪 HttpContactRepository: Getting contacts...")
+        
+        guard let ownerId = userIdProvider() else {
+            print("❌ HttpContactRepository: No user ID available")
+            throw ContactError.invalidData("User ID not available")
+        }
+        
+        print("🏪 HttpContactRepository: Using owner ID: \(ownerId)")
+        
+        do {
+            let contacts: [Contact] = try await httpClient.get(.listContacts(ownerId: ownerId))
+            print("✅ HttpContactRepository: Successfully retrieved \(contacts.count) contacts")
+            return contacts.sorted { $0.firstName < $1.firstName }
+        } catch {
+            print("❌ HttpContactRepository: Failed to get contacts - \(error)")
+            throw error
+        }
     }
     
     func getContact(id: String) async throws -> Contact? {
@@ -173,5 +189,30 @@ final class MockContactRepository: ContactRepositoryProtocol {
                 updatedAt: now
             )
         ]
+    }
+}
+
+// MARK: - Contact Errors
+
+enum ContactError: LocalizedError {
+    case notFound
+    case emailAlreadyExists
+    case invalidData(String)
+    case networkError
+    case unknown
+    
+    var errorDescription: String? {
+        switch self {
+        case .notFound:
+            return "Contact not found"
+        case .emailAlreadyExists:
+            return "A contact with this email already exists"
+        case .invalidData(let message):
+            return message
+        case .networkError:
+            return "Network connection error"
+        case .unknown:
+            return "An unknown error occurred"
+        }
     }
 }

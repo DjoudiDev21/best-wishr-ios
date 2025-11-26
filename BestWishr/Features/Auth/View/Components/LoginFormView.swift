@@ -2,6 +2,7 @@ import SwiftUI
 
 struct LoginFormView: View {
     @ObservedObject var viewModel: LoginViewModel
+    @ObservedObject var socialAuthViewModel: SocialAuthViewModel
     @ObservedObject var store: AuthStore
     let onSignUpTap: () -> Void
     let onForgotPasswordTap: () -> Void
@@ -71,21 +72,12 @@ struct LoginFormView: View {
             
             HStack(spacing: 10) {
                 SocialLoginButton(icon: "globe") {
-                    // TODO: Implement Google Sign In
+                    socialAuthViewModel.googleLogin()
                 }
                 
                 SocialLoginButton(icon: "applelogo") {
-                    Task {
-                        do {
-                            let appleAuthService = AppleAuthService()
-                            let result = try await appleAuthService.auth()
-                            
-                            await store.appleAuth(
-                                identityToken: result.identityToken,
-                                authorizationCode: result.authorizationCode
-                            )
-                        } catch { }
-                    }
+                    print("🎯 LoginFormView: Apple button tapped!")
+                    socialAuthViewModel.appleLogin()
                 }
             }
             

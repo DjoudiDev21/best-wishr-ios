@@ -24,13 +24,6 @@ struct ContactRequestDto: Encodable {
     let category: String
 }
 
-struct ContactsListDto: Decodable {
-    let contacts: [ContactResponseDto]
-    let totalCount: Int
-    let page: Int
-    let pageSize: Int
-}
-
 // MARK: - Contact Filters
 
 struct ContactFilters {

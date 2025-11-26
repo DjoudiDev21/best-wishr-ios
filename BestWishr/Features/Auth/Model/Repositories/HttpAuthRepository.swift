@@ -95,6 +95,10 @@ final class HttpAuthRepository: AuthRepositoryProtocol {
     }
     
     func appleAuth(request: AppleAuthRequestDto) async throws -> AuthSession {
+        print("🌐 HttpAuthRepository: Starting Apple auth request")
+        print("🌐 HttpAuthRepository: Identity token: \(String(request.identityToken.prefix(50)))...")
+        print("🌐 HttpAuthRepository: Authorization code: \(String(request.authorizationCode.prefix(20)))...")
+        
         let body = SocialAuthRequestDto(
             provider: "APPLE",
             accessToken: request.identityToken,
@@ -103,8 +107,13 @@ final class HttpAuthRepository: AuthRepositoryProtocol {
             redirectUri: nil
         )
         
+        print("🌐 HttpAuthRepository: Created SocialAuthRequestDto with provider: \(body.provider), platform: \(body.platform)")
+        
         do {
+            print("🌐 HttpAuthRepository: Making HTTP POST request to .authSocialMobile")
             let response: SocialAuthResponseDto = try await httpClient.post(.authSocialMobile, body: body)
+            print("🌐 HttpAuthRepository: HTTP request SUCCESS - user email: \(response.user.email)")
+            
             let user = User(
                 id: response.user.id,
                 email: response.user.email,
@@ -116,8 +125,11 @@ final class HttpAuthRepository: AuthRepositoryProtocol {
                 refreshToken: response.refreshToken
             )
             let session = AuthSession(user: user, tokens: tokens)
+            print("🌐 HttpAuthRepository: Created AuthSession successfully")
             return session
         } catch {
+            print("🌐 HttpAuthRepository: HTTP request FAILED - error: \(error.localizedDescription)")
+            print("🌐 HttpAuthRepository: Error type: \(type(of: error))")
             throw error
         }
     }

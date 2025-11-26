@@ -40,7 +40,7 @@ struct ContactsScreen: View {
                     // Quick stats
                     ContactQuickStats(
                         contacts: appStore.contactsStore.contacts,
-                        upcomingEventsCount: appStore.contactsStore.contactStats.upcomingEventsCount
+                        upcomingEventsCount: appStore.appStats.upcomingEventsCount
                     )
                 }
                 .padding(.horizontal, 20)

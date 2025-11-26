@@ -4,27 +4,46 @@ protocol HttpClientProtocol {
     func get<T: Decodable>(_ endpoint: ApiEndpoint) async throws -> T
     func post<T: Decodable, U: Encodable>(_ endpoint: ApiEndpoint, body: U) async throws -> T
     func postVoid<U: Encodable>(_ endpoint: ApiEndpoint, body: U) async throws
+    func put<T: Decodable, U: Encodable>(_ endpoint: ApiEndpoint, body: U) async throws -> T
+    func delete(_ endpoint: ApiEndpoint) async throws
 }
 
 final class HttpClient: HttpClientProtocol {
     private let baseURL: URL
     private let session: URLSession
     private let errorHandler: GlobalErrorHandlerProtocol
-    
-    init(baseURL: URL, session: URLSession = .shared, errorHandler: GlobalErrorHandlerProtocol = GlobalErrorHandler.shared) {
+    private let tokenProvider: () -> String?
+
+    init(baseURL: URL, session: URLSession = .shared, errorHandler: GlobalErrorHandlerProtocol = GlobalErrorHandler.shared, tokenProvider: @escaping () -> String? = { nil }
+) {
         self.baseURL = baseURL
         self.session = session
         self.errorHandler = errorHandler
+        self.tokenProvider = tokenProvider
     }
 
     func get<T: Decodable>(_ endpoint: ApiEndpoint) async throws -> T {
-        let request = try endpoint.makeRequest(baseURL: baseURL)
+        var request = try endpoint.makeRequest(baseURL: baseURL)
+        addAuthHeaderIfNeeded(to: &request, endpoint: endpoint)
+        
+        print("🌐 GET Request: \(request.url?.absoluteString ?? "unknown URL")")
+        print("📤 Headers: \(request.allHTTPHeaderFields ?? [:])")
         
         do {
             let (data, response) = try await session.data(for: request)
+            
+            // Log response details
+            if let httpResponse = response as? HTTPURLResponse {
+                print("📥 GET Response received: \(data.count) bytes, status: \(httpResponse.statusCode)")
+                if let responseString = String(data: data, encoding: .utf8) {
+                    print("📥 GET Response body: \(responseString)")
+                }
+            }
+            
             let result: T = try decodeResponse(data: data, response: response)
             return result
         } catch {
+            print("❌ GET Request failed: \(error)")
             throw error
         }
     }
@@ -34,6 +53,7 @@ final class HttpClient: HttpClientProtocol {
         request.httpMethod = "POST"
         request.httpBody = try JSONEncoder().encode(body)
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        addAuthHeaderIfNeeded(to: &request, endpoint: endpoint)
         
         print("🌐 POST Request: \(request.url?.absoluteString ?? "unknown URL")")
         print("📤 Headers: \(request.allHTTPHeaderFields ?? [:])")
@@ -66,6 +86,7 @@ final class HttpClient: HttpClientProtocol {
         request.httpMethod = "POST"
         request.httpBody = try JSONEncoder().encode(body)
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        addAuthHeaderIfNeeded(to: &request, endpoint: endpoint)
         print("🌐 HttpClient.postVoid: Set headers and body")
         
         if let bodyData = request.httpBody, let bodyString = String(data: bodyData, encoding: .utf8) {
@@ -80,6 +101,35 @@ final class HttpClient: HttpClientProtocol {
             print("✅ HttpClient.postVoid: Request completed successfully")
         } catch {
             print("❌ HttpClient.postVoid: Request failed with error: \(error)")
+            throw error
+        }
+    }
+    
+    func put<T: Decodable, U: Encodable>(_ endpoint: ApiEndpoint, body: U) async throws -> T {
+        var request = try endpoint.makeRequest(baseURL: baseURL)
+        request.httpMethod = "PUT"
+        request.httpBody = try JSONEncoder().encode(body)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        addAuthHeaderIfNeeded(to: &request, endpoint: endpoint)
+        
+        do {
+            let (data, response) = try await session.data(for: request)
+            let result: T = try decodeResponse(data: data, response: response)
+            return result
+        } catch {
+            throw error
+        }
+    }
+    
+    func delete(_ endpoint: ApiEndpoint) async throws {
+        var request = try endpoint.makeRequest(baseURL: baseURL)
+        request.httpMethod = "DELETE"
+        addAuthHeaderIfNeeded(to: &request, endpoint: endpoint)
+        
+        do {
+            let (data, response) = try await session.data(for: request)
+            try validateResponse(response: response, data: data)
+        } catch {
             throw error
         }
     }
@@ -146,6 +196,22 @@ final class HttpClient: HttpClientProtocol {
             return try JSONDecoder().decode(T.self, from: data)
         } catch {
             throw AppError.decodingError("Failed to decode response: \(error.localizedDescription)")
+        }
+    }
+    
+    private func addAuthHeaderIfNeeded(
+        to request: inout URLRequest,
+        endpoint: ApiEndpoint
+    ) {
+        if endpoint.requiresAuth {
+            if let token = tokenProvider() {
+                print("🔑 HttpClient: Adding auth token for \(endpoint) - Token: \(String(token.prefix(20)))...")
+                request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            } else {
+                print("⚠️ HttpClient: No token available for \(endpoint) (requires auth)")
+            }
+        } else {
+            print("🔓 HttpClient: No auth required for \(endpoint)")
         }
     }
 }

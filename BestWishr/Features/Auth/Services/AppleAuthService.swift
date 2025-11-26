@@ -23,22 +23,30 @@ final class AppleAuthService: NSObject, ObservableObject {
     
     // MARK: - Public Methods
     func auth() async throws -> AppleAuthResult {
+        print("🍎 AppleAuthService: Starting Apple Sign-In process")
         isLoading = true
-        defer { isLoading = false }
+        defer { 
+            isLoading = false
+            print("🍎 AppleAuthService: Finished Apple Sign-In process, loading = false")
+        }
         
         return try await withCheckedThrowingContinuation { continuation in
+            print("🍎 AppleAuthService: Setting up continuation for async auth")
             self.continuation = continuation
             
             let appleIDProvider = ASAuthorizationAppleIDProvider()
             let request = appleIDProvider.createRequest()
             request.requestedScopes = [.fullName, .email]
+            print("🍎 AppleAuthService: Created request with scopes: \(request.requestedScopes?.description ?? "none")")
             
             self.currentRequest = request
             
             let authorizationController = ASAuthorizationController(authorizationRequests: [request])
             authorizationController.delegate = self
             authorizationController.presentationContextProvider = self
+            print("🍎 AppleAuthService: About to perform authorization requests")
             authorizationController.performRequests()
+            print("🍎 AppleAuthService: Authorization requests performed")
         }
     }
     
@@ -60,25 +68,33 @@ final class AppleAuthService: NSObject, ObservableObject {
 extension AppleAuthService: ASAuthorizationControllerDelegate {
     
     func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
+        print("🍎 AppleAuthService: Authorization completed successfully")
+        
         guard let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential else {
+            print("🍎 AppleAuthService: ERROR - Invalid credential type")
             continuation?.resume(throwing: AppleAuthError.invalidCredential)
             continuation = nil
             return
         }
+        print("🍎 AppleAuthService: Got Apple ID credential for user: \(appleIDCredential.user)")
         
         guard let identityTokenData = appleIDCredential.identityToken,
               let identityToken = String(data: identityTokenData, encoding: .utf8) else {
+            print("🍎 AppleAuthService: ERROR - Missing or invalid identity token")
             continuation?.resume(throwing: AppleAuthError.missingIdentityToken)
             continuation = nil
             return
         }
+        print("🍎 AppleAuthService: Got identity token: \(String(identityToken.prefix(50)))...")
         
         guard let authorizationCodeData = appleIDCredential.authorizationCode,
               let authorizationCode = String(data: authorizationCodeData, encoding: .utf8) else {
+            print("🍎 AppleAuthService: ERROR - Missing or invalid authorization code")
             continuation?.resume(throwing: AppleAuthError.missingAuthorizationCode)
             continuation = nil
             return
         }
+        print("🍎 AppleAuthService: Got authorization code: \(String(authorizationCode.prefix(20)))...")
         
         let result = AppleAuthResult(
             userIdentifier: appleIDCredential.user,
@@ -88,30 +104,43 @@ extension AppleAuthService: ASAuthorizationControllerDelegate {
             authorizationCode: authorizationCode
         )
         
+        print("🍎 AppleAuthService: Created result with email: \(result.email ?? "nil"), fullName: \(result.fullName?.description ?? "nil")")
         continuation?.resume(returning: result)
         continuation = nil
+        print("🍎 AppleAuthService: Resumed continuation with success")
     }
     
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+        print("🍎 AppleAuthService: Authorization completed with ERROR: \(error.localizedDescription)")
+        
         if let authError = error as? ASAuthorizationError {
+            print("🍎 AppleAuthService: ASAuthorizationError code: \(authError.code.rawValue)")
             switch authError.code {
             case .canceled:
+                print("🍎 AppleAuthService: User canceled authorization")
                 continuation?.resume(throwing: AppleAuthError.userCanceled)
             case .failed:
+                print("🍎 AppleAuthService: Authorization failed")
                 continuation?.resume(throwing: AppleAuthError.authorizationFailed)
             case .invalidResponse:
+                print("🍎 AppleAuthService: Invalid response")
                 continuation?.resume(throwing: AppleAuthError.invalidResponse)
             case .notHandled:
+                print("🍎 AppleAuthService: Not handled")
                 continuation?.resume(throwing: AppleAuthError.notHandled)
             case .unknown:
+                print("🍎 AppleAuthService: Unknown error")
                 continuation?.resume(throwing: AppleAuthError.unknown)
             @unknown default:
+                print("🍎 AppleAuthService: Unknown default error")
                 continuation?.resume(throwing: AppleAuthError.unknown)
             }
         } else {
+            print("🍎 AppleAuthService: Non-ASAuthorizationError: \(type(of: error))")
             continuation?.resume(throwing: error)
         }
         continuation = nil
+        print("🍎 AppleAuthService: Error handling complete, continuation cleared")
     }
 }
 

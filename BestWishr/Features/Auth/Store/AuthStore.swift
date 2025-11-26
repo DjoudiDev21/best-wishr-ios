@@ -150,6 +150,10 @@ final class AuthStore: ObservableObject {
     }
     
     func appleAuth(identityToken: String, authorizationCode: String) async {
+        print("🏪 AuthStore: Starting Apple auth with tokens")
+        print("🏪 AuthStore: Identity token: \(String(identityToken.prefix(50)))...")
+        print("🏪 AuthStore: Authorization code: \(String(authorizationCode.prefix(20)))...")
+        
         isLoading = true
         
         let request = AppleAuthRequestDto(
@@ -161,16 +165,25 @@ final class AuthStore: ObservableObject {
             authorizationCode: authorizationCode
         )
         
+        print("🏪 AuthStore: Created AppleAuthRequestDto, calling presenter.performAppleAuth")
         let result = await presenter.performAppleAuth(request: request)
         
         switch result {
         case .success(let session):
+            print("🏪 AuthStore: Apple auth SUCCESS - user: \(session.user.email)")
             handleLoginSuccess(session)
         case .failure(let error):
-            handleLoginFailure(error, email: nil)
+            print("🏪 AuthStore: Apple auth FAILURE - error: \(error.localizedDescription)")
+            handleAppleAuthFailure(error)
         }
         
         isLoading = false
+        print("🏪 AuthStore: Apple auth completed, isLoading = false")
+    }
+    
+    func handleAppleAuthError(_ error: Error) async {
+        print("🏪 AuthStore: Handling Apple auth error from view model: \(error)")
+        handleAppleAuthFailure(error)
     }
     
     func resendVerificationEmail(email: String) async {
@@ -319,6 +332,53 @@ final class AuthStore: ObservableObject {
         self.user = nil
         self.tokens = nil
         updateAuthState()
+    }
+    
+    private func handleAppleAuthFailure(_ error: Error) {
+        // Clear any auth state
+        self.user = nil
+        self.tokens = nil
+        updateAuthState()
+        
+        // Handle Apple-specific errors with user-friendly messages
+        let errorMessage = getAppleAuthErrorMessage(error)
+        notificationHandler.showError(errorMessage)
+    }
+    
+    private func getAppleAuthErrorMessage(_ error: Error) -> String {
+        // Check if it's an AppleAuthError first
+        if let appleAuthError = error as? AppleAuthError {
+            switch appleAuthError {
+            case .userCanceled:
+                return "Apple Sign In was canceled"
+            case .authorizationFailed:
+                return "Apple Sign In failed. Please try again."
+            case .invalidCredential:
+                return "Invalid Apple Sign In credentials"
+            case .missingIdentityToken, .missingAuthorizationCode:
+                return "Apple Sign In setup error. Please try again."
+            case .invalidResponse, .notHandled, .unknown:
+                return "Apple Sign In is not properly configured. Please enable it in Settings."
+            }
+        }
+        
+        // Check if it's a backend error
+        if let appError = error as? AppError {
+            switch appError {
+            case .authentication(let message):
+                return "Authentication failed: \(message)"
+            case .server(_, let message):
+                return "Server error: \(message)"
+            case .network(let message):
+                return "Network error: \(message)"
+            case .validation(let message):
+                return message
+            default:
+                return "Apple Sign In failed. Please try again."
+            }
+        }
+        
+        return "Apple Sign In failed: \(error.localizedDescription)"
     }
     
     func handleExpiredVerificationToken(email: String) {

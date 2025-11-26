@@ -40,7 +40,6 @@ final class ContactsStore: ObservableObject {
     var contactStats: ContactStats {
         ContactStats(
             totalCount: contacts.count,
-            upcomingEventsCount: 3, // TODO: Calculate from events
             thisMonthCount: calculateThisMonthBirthdays()
         )
     }
@@ -153,6 +152,5 @@ final class ContactsStore: ObservableObject {
 
 struct ContactStats {
     let totalCount: Int
-    let upcomingEventsCount: Int
     let thisMonthCount: Int
 }

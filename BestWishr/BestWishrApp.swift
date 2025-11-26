@@ -7,6 +7,7 @@ struct BestWishrApp: App {
     @StateObject private var loginViewModel: LoginViewModel
     @StateObject private var registerViewModel: RegisterViewModel
     @StateObject private var forgotPasswordViewModel: ForgotPasswordViewModel
+    @StateObject private var socialAuthViewModel: SocialAuthViewModel
 
     init() {
         let appStore = AppStore()
@@ -14,6 +15,7 @@ struct BestWishrApp: App {
         _loginViewModel = StateObject(wrappedValue: LoginViewModel(store: appStore.authStore))
         _registerViewModel = StateObject(wrappedValue: RegisterViewModel(store: appStore.authStore))
         _forgotPasswordViewModel = StateObject(wrappedValue: ForgotPasswordViewModel(store: appStore.authStore))
+        _socialAuthViewModel = StateObject(wrappedValue: SocialAuthViewModel(store: appStore.authStore))
         _urlManager = StateObject(wrappedValue: URLManager())
     }
 
@@ -39,6 +41,7 @@ struct BestWishrApp: App {
                             token: urlManager.resetPasswordToken,
                             email: urlManager.resetPasswordEmail
                         ),
+                        socialAuthViewModel: socialAuthViewModel,
                         authStore: appStore.authStore,
                     )
                     .environmentObject(appStore)

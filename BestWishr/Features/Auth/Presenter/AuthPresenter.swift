@@ -52,6 +52,19 @@ class AuthPresenter: AuthPresenterProtocol {
     }
     
     func performAppleAuth(request: AppleAuthRequestDto) async -> Result<AuthSession, Error> {
-        await appleAuthUseCase.execute(request: request)
+        print("🎭 AuthPresenter: Starting performAppleAuth")
+        print("🎭 AuthPresenter: Identity token: \(String(request.identityToken.prefix(50)))...")
+        print("🎭 AuthPresenter: Authorization code: \(String(request.authorizationCode.prefix(20)))...")
+        
+        let result = await appleAuthUseCase.execute(request: request)
+        
+        switch result {
+        case .success(let session):
+            print("🎭 AuthPresenter: AppleAuthUseCase SUCCESS - user: \(session.user.email)")
+        case .failure(let error):
+            print("🎭 AuthPresenter: AppleAuthUseCase FAILURE - error: \(error.localizedDescription)")
+        }
+        
+        return result
     }
 }

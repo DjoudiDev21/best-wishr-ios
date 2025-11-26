@@ -49,6 +49,7 @@ struct RegisterScreen: View {
             }
         }
         .onAppear {
+            viewModel.shouldDismiss = false
             withAnimation(.easeInOut(duration: 1)) {
                 isAnimating = true
             }
@@ -60,6 +61,9 @@ struct RegisterScreen: View {
             if shouldDismiss {
                 dismiss()
             }
+        }
+        .onDisappear {
+            viewModel.shouldDismiss = false
         }
     }
 }

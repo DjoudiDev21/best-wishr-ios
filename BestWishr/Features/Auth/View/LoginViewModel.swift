@@ -2,8 +2,8 @@ import Foundation
 import Combine
 
 final class LoginViewModel: ObservableObject {
-    @Published var email = ""
-    @Published var password = ""
+    @Published var email = "abdelkrim.djoudi.dev@gmail.com"
+    @Published var password = "Gstarraw95100?"
     @Published var isButtonDisabled = true
     @Published var needsEmailVerification = false
     

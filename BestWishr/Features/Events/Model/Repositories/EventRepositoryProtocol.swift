@@ -21,27 +21,3 @@ protocol EventRepositoryProtocol {
     func getEventsCount() async throws -> Int
     func getUpcomingEventsCount() async throws -> Int
 }
-
-// MARK: - Event Errors
-enum EventError: LocalizedError {
-    case notFound
-    case invalidData(String)
-    case dateConflict
-    case networkError
-    case unknown
-    
-    var errorDescription: String? {
-        switch self {
-        case .notFound:
-            return "Event not found"
-        case .invalidData(let message):
-            return message
-        case .dateConflict:
-            return "Event date conflicts with existing event"
-        case .networkError:
-            return "Network connection error"
-        case .unknown:
-            return "An unknown error occurred"
-        }
-    }
-}

@@ -5,6 +5,7 @@ struct LoginScreen: View {
     @ObservedObject var registerViewModel: RegisterViewModel
     @ObservedObject var forgotPasswordViewModel: ForgotPasswordViewModel
     @ObservedObject var resetPasswordViewModel: ResetPasswordViewModel
+    @ObservedObject var socialAuthViewModel: SocialAuthViewModel
     @ObservedObject var authStore: AuthStore
     @EnvironmentObject var urlManager: URLManager
     @State private var showRegister = false
@@ -36,6 +37,7 @@ struct LoginScreen: View {
                 VStack(spacing: 0) {
                     LoginFormView(
                         viewModel: loginViewModel,
+                        socialAuthViewModel: socialAuthViewModel,
                         store: authStore,
                         onSignUpTap: { showRegister = true },
                         onForgotPasswordTap: { showForgotPassword = true }

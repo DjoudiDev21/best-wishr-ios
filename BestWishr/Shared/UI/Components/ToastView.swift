@@ -33,6 +33,8 @@ struct ToastView: View {
             return "info.circle.fill"
         case .warning:
             return "exclamationmark.triangle.fill"
+        case .error:
+            return "xmark.circle.fill"
         }
     }
     
@@ -44,6 +46,8 @@ struct ToastView: View {
             return Color.blue
         case .warning:
             return Color.orange
+        case .error:
+            return Color.red
         }
     }
 }

@@ -1,6 +1,6 @@
 import Foundation
 
-enum AgeGroup: String, CaseIterable {
+enum AgeGroup: String, CaseIterable, Codable {
     case child = "0-12"
     case teen = "13-19" 
     case adult = "20-64"

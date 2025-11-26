@@ -32,10 +32,14 @@ final class AppStore: ObservableObject {
             resetPasswordUseCase: resetPasswordUseCase,
             appleAuthUseCase: appleAuthUseCase
         )
-        self.authStore = AuthStore(presenter: authPresenter)
+        let authStore = AuthStore(presenter: authPresenter)
+        self.authStore = authStore
         
         // Initialize contactsStore
-        let contactsRepository = Self.createContactsRepository()
+        let contactsRepository = Self.createContactsRepository(
+            tokenProvider: { authStore.tokens?.accessToken },
+            userIdProvider: { authStore.user?.id }
+        )
         let getContactsUseCase = GetContactsUseCase(repository: contactsRepository)
         let createContactUseCase = CreateContactUseCase(repository: contactsRepository)
         let deleteContactUseCase = DeleteContactUseCase(repository: contactsRepository)
@@ -47,7 +51,10 @@ final class AppStore: ObservableObject {
         self.contactsStore = ContactsStore(presenter: contactsPresenter)
         
         // Initialize eventsStore
-        let eventsRepository = Self.createEventsRepository()
+        let eventsRepository = Self.createEventsRepository(
+            tokenProvider: { authStore.tokens?.accessToken },
+            userIdProvider: { authStore.user?.id }
+        )
         let getEventsUseCase = GetEventsUseCase(repository: eventsRepository)
         let createEventUseCase = CreateEventUseCase(repository: eventsRepository)
         let deleteEventUseCase = DeleteEventUseCase(repository: eventsRepository)
@@ -59,7 +66,9 @@ final class AppStore: ObservableObject {
         self.eventsStore = EventsStore(presenter: eventsPresenter)
         
         // Initialize giftsStore
-        let giftsRepository = Self.createGiftsRepository()
+        let giftsRepository = Self.createGiftsRepository { 
+            authStore.tokens?.accessToken
+        }
         let generatePersonalizedSuggestionsUseCase = GeneratePersonalizedGiftSuggestionsUseCase(repository: giftsRepository)
         let generateGeneralSuggestionsUseCase = GenerateGeneralGiftSuggestionsUseCase(repository: giftsRepository)
         let saveGiftToWishlistUseCase = SaveGiftToWishlistUseCase(repository: giftsRepository)
@@ -74,6 +83,7 @@ final class AppStore: ObservableObject {
         )
         self.giftsStore = GiftsStore(presenter: giftsPresenter)
         
+        // Set up observers after all stores are initialized
         observeAuthChanges()
         observeContactsChanges()
         observeEventsChanges()
@@ -93,16 +103,27 @@ final class AppStore: ObservableObject {
         return HttpAuthRepository(httpClient: httpClient)
     }
     
-    private static func createContactsRepository() -> ContactRepositoryProtocol {
-        return MockContactRepository()
+    private static func createContactsRepository(
+        tokenProvider: @escaping () -> String?,
+        userIdProvider: @escaping () -> String?
+    ) -> ContactRepositoryProtocol {
+        let httpClient = HttpClient(baseURL: baseURL, tokenProvider: tokenProvider)
+        return HttpContactRepository(httpClient: httpClient, userIdProvider: userIdProvider)
     }
     
-    private static func createEventsRepository() -> EventRepositoryProtocol {
-        return MockEventRepository()
+    private static func createEventsRepository(
+        tokenProvider: @escaping () -> String?,
+        userIdProvider: @escaping () -> String?
+    ) -> EventRepositoryProtocol {
+        let httpClient = HttpClient(baseURL: baseURL, tokenProvider: tokenProvider)
+        return HttpEventRepository(httpClient: httpClient, userIdProvider: userIdProvider)
     }
     
-    private static func createGiftsRepository() -> GiftRepository {
-        return MockGiftRepository()
+    private static func createGiftsRepository(
+        tokenProvider: @escaping () -> String?
+    ) -> GiftRepository {
+        let httpClient = HttpClient(baseURL: baseURL, tokenProvider: tokenProvider)
+        return HttpGiftRepository(httpClient: httpClient)
     }
 
     private func observeAuthChanges() {
@@ -150,6 +171,21 @@ final class AppStore: ObservableObject {
             .store(in: &cancellables)
     }
     
+    // MARK: - Cross-Store Computed Properties
+    
+    /// Comprehensive stats that combine data from multiple stores
+    var appStats: AppStats {
+        let upcomingEvents = eventsStore.events.filter { $0.date > Date() }
+        
+        return AppStats(
+            contactsCount: contactsStore.contacts.count,
+            upcomingEventsCount: upcomingEvents.count,
+            thisMonthBirthdaysCount: contactsStore.contactStats.thisMonthCount,
+            totalEventsCount: eventsStore.events.count,
+            isDataLoaded: !contactsStore.contacts.isEmpty || !eventsStore.events.isEmpty
+        )
+    }
+    
     // MARK: - Data Preloading
     
     private func preloadEssentialData() async {
@@ -176,5 +212,27 @@ final class AppStore: ObservableObject {
     private func loadRecentEvents() async {
         // Load recent and upcoming events (60-day window)
         await eventsStore.loadRecentEvents()
+    }
+}
+
+// MARK: - Supporting Types
+
+struct AppStats {
+    let contactsCount: Int
+    let upcomingEventsCount: Int
+    let thisMonthBirthdaysCount: Int
+    let totalEventsCount: Int
+    let isDataLoaded: Bool
+    
+    var hasUpcomingEvents: Bool {
+        upcomingEventsCount > 0
+    }
+    
+    var hasContacts: Bool {
+        contactsCount > 0
+    }
+    
+    var hasThisMonthBirthdays: Bool {
+        thisMonthBirthdaysCount > 0
     }
 }

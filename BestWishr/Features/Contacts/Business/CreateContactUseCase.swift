@@ -8,21 +8,32 @@ struct CreateContactUseCase {
     }
     
     func execute(_ contactData: ContactCreationData) async -> Result<Contact, Error> {
+        print("🏗️ CreateContactUseCase: Starting execution")
+        print("🏗️ CreateContactUseCase: Input data - firstName: \(contactData.firstName), lastName: \(contactData.lastName)")
+        
         do {
             // Validate input
+            print("🏗️ CreateContactUseCase: Validating contact data")
             let validation = validateContactData(contactData)
             if let validationError = validation {
+                print("❌ CreateContactUseCase: Validation failed - \(validationError)")
                 return .failure(validationError)
             }
+            print("✅ CreateContactUseCase: Validation passed")
             
             // Create contact entity
+            print("🏗️ CreateContactUseCase: Creating contact entity")
             let contact = contactData.toContact()
+            print("🏗️ CreateContactUseCase: Contact entity created - ID: \(contact.id)")
             
             // Save to repository
+            print("🏗️ CreateContactUseCase: Calling repository.createContact")
             let savedContact = try await repository.createContact(contact)
+            print("✅ CreateContactUseCase: Repository call succeeded - Saved contact ID: \(savedContact.id)")
             
             return .success(savedContact)
         } catch {
+            print("❌ CreateContactUseCase: Repository call failed - \(error)")
             return .failure(error)
         }
     }
@@ -33,10 +44,6 @@ struct CreateContactUseCase {
             return ContactError.invalidData("First name is required")
         }
         
-        // Validate last name
-        if data.lastName.trimmingCharacters(in: .whitespaces).isEmpty {
-            return ContactError.invalidData("Last name is required")
-        }
         
         // Validate email format if provided
         if !data.email.isEmpty {

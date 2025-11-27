@@ -8,6 +8,8 @@ struct BestWishrApp: App {
     @StateObject private var registerViewModel: RegisterViewModel
     @StateObject private var forgotPasswordViewModel: ForgotPasswordViewModel
     @StateObject private var socialAuthViewModel: SocialAuthViewModel
+    @StateObject private var contactsViewModel: ContactsViewModel
+    @StateObject private var addContactViewModel: AddContactViewModel
 
     init() {
         let appStore = AppStore()
@@ -16,6 +18,8 @@ struct BestWishrApp: App {
         _registerViewModel = StateObject(wrappedValue: RegisterViewModel(store: appStore.authStore))
         _forgotPasswordViewModel = StateObject(wrappedValue: ForgotPasswordViewModel(store: appStore.authStore))
         _socialAuthViewModel = StateObject(wrappedValue: SocialAuthViewModel(store: appStore.authStore))
+        _contactsViewModel = StateObject(wrappedValue: ContactsViewModel(contactsStore: appStore.contactsStore, appStats: appStore.appStats))
+        _addContactViewModel = StateObject(wrappedValue: AddContactViewModel(contactsStore: appStore.contactsStore))
         _urlManager = StateObject(wrappedValue: URLManager())
     }
 
@@ -28,6 +32,8 @@ struct BestWishrApp: App {
                             .environmentObject(appStore)
                     } else {
                         HomeScreen()
+                            .environmentObject(contactsViewModel)
+                            .environmentObject(addContactViewModel)
                             .environmentObject(appStore)
                             .withErrorHandling()
                     }

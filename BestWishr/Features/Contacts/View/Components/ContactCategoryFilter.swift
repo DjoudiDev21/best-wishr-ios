@@ -94,6 +94,7 @@ struct FilterChip: View {
                     lineWidth: 1
                 )
         )
+        .contentShape(Rectangle())
         .onTapGesture {
             onTap()
         }

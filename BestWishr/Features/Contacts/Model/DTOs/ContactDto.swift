@@ -1,29 +1,5 @@
 import Foundation
 
-// MARK: - Contact DTOs
-
-struct ContactResponseDto: Decodable {
-    let id: String
-    let firstName: String
-    let lastName: String
-    let email: String?
-    let phoneNumber: String?
-    let dateOfBirth: String?
-    let category: String
-    let avatar: String?
-    let createdAt: String
-    let updatedAt: String
-}
-
-struct ContactRequestDto: Encodable {
-    let firstName: String
-    let lastName: String
-    let email: String?
-    let phoneNumber: String?
-    let dateOfBirth: String?
-    let category: String
-}
-
 // MARK: - Contact Filters
 
 struct ContactFilters {

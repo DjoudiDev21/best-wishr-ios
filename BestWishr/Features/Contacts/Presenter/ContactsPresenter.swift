@@ -20,7 +20,19 @@ class ContactsPresenter: ContactsPresenterProtocol {
     }
     
     func createContact(_ contactData: ContactCreationData) async -> Result<Contact, Error> {
-        await createContactUseCase.execute(contactData)
+        print("🎭 ContactsPresenter: Received create contact request")
+        print("🎭 ContactsPresenter: Contact data - firstName: \(contactData.firstName), lastName: \(contactData.lastName)")
+        
+        let result = await createContactUseCase.execute(contactData)
+        
+        switch result {
+        case .success(let contact):
+            print("✅ ContactsPresenter: CreateContactUseCase succeeded - Contact ID: \(contact.id)")
+        case .failure(let error):
+            print("❌ ContactsPresenter: CreateContactUseCase failed - \(error)")
+        }
+        
+        return result
     }
     
     func deleteContact(id: String) async -> Result<Void, Error> {

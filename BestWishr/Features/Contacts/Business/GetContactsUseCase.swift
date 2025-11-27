@@ -34,7 +34,7 @@ struct GetContactsUseCase {
         case .firstName:
             return contacts.sorted { $0.firstName < $1.firstName }
         case .lastName:
-            return contacts.sorted { $0.lastName < $1.lastName }
+            return contacts.sorted { ($0.lastName ?? "") < ($1.lastName ?? "") }
         case .dateAdded:
             return contacts.sorted { $0.createdAt > $1.createdAt }
         case .category:

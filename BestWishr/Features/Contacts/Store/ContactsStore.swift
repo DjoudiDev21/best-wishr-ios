@@ -24,7 +24,7 @@ final class ContactsStore: ObservableObject {
         if !searchText.isEmpty {
             result = result.filter { contact in
                 contact.firstName.localizedCaseInsensitiveContains(searchText) ||
-                contact.lastName.localizedCaseInsensitiveContains(searchText) ||
+                ((contact.lastName?.localizedCaseInsensitiveContains(searchText)) != nil) ||
                 contact.email?.localizedCaseInsensitiveContains(searchText) == true
             }
         }
@@ -54,6 +54,9 @@ final class ContactsStore: ObservableObject {
     
     // MARK: - Actions
     func loadContacts() async {
+        // Prevent multiple concurrent requests
+        guard !isLoading else { return }
+        
         isLoading = true
         error = nil
         
@@ -71,6 +74,9 @@ final class ContactsStore: ObservableObject {
     }
     
     func createContact(_ contactData: ContactCreationData) async -> Bool {
+        print("🏪 ContactsStore: Starting contact creation")
+        print("🏪 ContactsStore: Contact data - firstName: \(contactData.firstName), lastName: \(contactData.lastName), email: \(contactData.email)")
+        
         isLoading = true
         error = nil
         
@@ -78,11 +84,14 @@ final class ContactsStore: ObservableObject {
         
         switch result {
         case .success(let newContact):
+            print("✅ ContactsStore: Contact created successfully - ID: \(newContact.id)")
             contacts.append(newContact)
             contacts = contacts.sorted { $0.firstName < $1.firstName }
+            print("🏪 ContactsStore: Updated contacts list, new count: \(contacts.count)")
             isLoading = false
             return true
         case .failure(let createError):
+            print("❌ ContactsStore: Contact creation failed - \(createError)")
             error = createError
             errorHandler.handle(createError)
             isLoading = false

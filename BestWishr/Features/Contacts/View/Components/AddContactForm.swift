@@ -12,7 +12,7 @@ struct AddContactForm: View {
             }
             
             // Last Name
-            AddContactFormField(title: "Last Name", required: true) {
+            AddContactFormField(title: "Last Name", required: false) {
                 TextField("Last name", text: $contactData.lastName)
                     .textFieldStyle(AddContactTextFieldStyle())
             }
@@ -185,9 +185,4 @@ struct AddContactTextFieldStyle: TextFieldStyle {
                     )
             )
     }
-}
-
-#Preview {
-    AddContactForm(contactData: .constant(ContactCreationData()))
-        .padding()
 }

@@ -23,8 +23,8 @@ final class MockContactRepository: ContactRepositoryProtocol {
         try await Task.sleep(nanoseconds: 800_000_000) // 0.8 seconds
         
         // Validate required fields
-        guard !contact.firstName.isEmpty, !contact.lastName.isEmpty else {
-            throw ContactError.invalidData("First name and last name are required")
+        guard !contact.firstName.isEmpty else {
+            throw ContactError.invalidData("First name is required")
         }
         
         // Check for duplicate email
@@ -46,8 +46,8 @@ final class MockContactRepository: ContactRepositoryProtocol {
         }
         
         // Validate required fields
-        guard !contact.firstName.isEmpty, !contact.lastName.isEmpty else {
-            throw ContactError.invalidData("First name and last name are required")
+        guard !contact.firstName.isEmpty else {
+            throw ContactError.invalidData("First name is required")
         }
         
         let updatedContact = Contact(
@@ -58,11 +58,12 @@ final class MockContactRepository: ContactRepositoryProtocol {
             phoneNumber: contact.phoneNumber,
             dateOfBirth: contact.dateOfBirth,
             category: contact.category,
+            description: contact.description,
+            interests: contact.interests,
             avatar: contact.avatar,
             createdAt: contact.createdAt,
             updatedAt: Date()
         )
-        
         contacts[index] = updatedContact
         return updatedContact
     }
@@ -83,7 +84,7 @@ final class MockContactRepository: ContactRepositoryProtocol {
         let lowercasedQuery = query.lowercased()
         return contacts.filter { contact in
             contact.firstName.lowercased().contains(lowercasedQuery) ||
-            contact.lastName.lowercased().contains(lowercasedQuery) ||
+            ((contact.lastName?.lowercased().contains(lowercasedQuery)) != nil) ||
             contact.email?.lowercased().contains(lowercasedQuery) == true
         }.sorted { $0.firstName < $1.firstName }
     }
@@ -108,6 +109,8 @@ final class MockContactRepository: ContactRepositoryProtocol {
                 phoneNumber: "+1234567890",
                 dateOfBirth: calendar.date(byAdding: .year, value: -28, to: now),
                 category: .friends,
+                description: "",
+                interests: [],
                 avatar: nil,
                 createdAt: calendar.date(byAdding: .day, value: -30, to: now) ?? now,
                 updatedAt: calendar.date(byAdding: .day, value: -5, to: now) ?? now
@@ -120,6 +123,8 @@ final class MockContactRepository: ContactRepositoryProtocol {
                 phoneNumber: "+1987654321",
                 dateOfBirth: calendar.date(byAdding: .year, value: -32, to: now),
                 category: .family,
+                description: "",
+                interests: [],
                 avatar: nil,
                 createdAt: calendar.date(byAdding: .day, value: -25, to: now) ?? now,
                 updatedAt: calendar.date(byAdding: .day, value: -3, to: now) ?? now
@@ -132,6 +137,8 @@ final class MockContactRepository: ContactRepositoryProtocol {
                 phoneNumber: "+1122334455",
                 dateOfBirth: calendar.date(byAdding: .year, value: -35, to: now),
                 category: .colleagues,
+                description: "",
+                interests: [],
                 avatar: nil,
                 createdAt: calendar.date(byAdding: .day, value: -20, to: now) ?? now,
                 updatedAt: calendar.date(byAdding: .day, value: -1, to: now) ?? now
@@ -144,6 +151,8 @@ final class MockContactRepository: ContactRepositoryProtocol {
                 phoneNumber: nil,
                 dateOfBirth: calendar.date(byAdding: .year, value: -29, to: now),
                 category: .friends,
+                description: "",
+                interests: [],
                 avatar: nil,
                 createdAt: calendar.date(byAdding: .day, value: -15, to: now) ?? now,
                 updatedAt: calendar.date(byAdding: .day, value: -2, to: now) ?? now
@@ -156,6 +165,8 @@ final class MockContactRepository: ContactRepositoryProtocol {
                 phoneNumber: "+1555666777",
                 dateOfBirth: calendar.date(byAdding: .year, value: -45, to: now),
                 category: .family,
+                description: "",
+                interests: [],
                 avatar: nil,
                 createdAt: calendar.date(byAdding: .day, value: -10, to: now) ?? now,
                 updatedAt: now
@@ -168,6 +179,8 @@ final class MockContactRepository: ContactRepositoryProtocol {
                 phoneNumber: "+1333222111",
                 dateOfBirth: calendar.date(byAdding: .year, value: -26, to: now),
                 category: .other,
+                description: "",
+                interests: [],
                 avatar: nil,
                 createdAt: calendar.date(byAdding: .day, value: -8, to: now) ?? now,
                 updatedAt: now

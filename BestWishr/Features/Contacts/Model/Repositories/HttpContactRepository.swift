@@ -21,8 +21,10 @@ final class HttpContactRepository: ContactRepositoryProtocol {
         print("🏪 HttpContactRepository: Using owner ID: \(ownerId)")
         
         do {
-            let contacts: [Contact] = try await httpClient.get(.listContacts(ownerId: ownerId))
-            print("✅ HttpContactRepository: Successfully retrieved \(contacts.count) contacts")
+            let contactDtos: [ContactResponseDto] = try await httpClient.get(.listContacts(ownerId: ownerId))
+            print("✅ HttpContactRepository: Successfully retrieved \(contactDtos.count) contact DTOs")
+            let contacts = contactDtos.map { $0.toEntity() }
+            print("✅ HttpContactRepository: Converted to \(contacts.count) contacts")
             return contacts.sorted { $0.firstName < $1.firstName }
         } catch {
             print("❌ HttpContactRepository: Failed to get contacts - \(error)")
@@ -36,24 +38,31 @@ final class HttpContactRepository: ContactRepositoryProtocol {
     }
     
     func createContact(_ contact: Contact) async throws -> Contact {
-        try await Task.sleep(nanoseconds: 800_000_000) // 0.8 seconds
+        print("🌐 HttpContactRepository: Starting contact creation")
+        print("🌐 HttpContactRepository: Contact - ID: \(contact.id), firstName: \(contact.firstName), lastName: \(contact.lastName ?? "")")
         
-        // Validate required fields
-        guard !contact.firstName.isEmpty, !contact.lastName.isEmpty else {
-            throw ContactError.invalidData("First name and last name are required")
+        guard let ownerId = userIdProvider() else {
+            print("❌ HttpContactRepository: No user ID available for contact creation")
+            throw ContactError.invalidData("User ID not available")
         }
         
-        // Check for duplicate email
-        if let email = contact.email, !email.isEmpty {
-            if contacts.contains(where: { $0.email?.lowercased() == email.lowercased() }) {
-                throw ContactError.emailAlreadyExists
-            }
+        do {
+            let body = contact.toRequestDto(ownerId: ownerId)
+            print("🌐 HttpContactRepository: Converted to DTO, making HTTP POST request")
+            
+            let responseDto: ContactResponseDto = try await httpClient.post(.createContact, body: body)
+            print("✅ HttpContactRepository: HTTP request succeeded")
+            print("🌐 HttpContactRepository: Response DTO - ID: \(responseDto.id), firstName: \(responseDto.firstName)")
+            
+            let savedContact = responseDto.toEntity()
+            print("✅ HttpContactRepository: Contact creation completed - Final ID: \(savedContact.id)")
+            return savedContact
+        } catch {
+            print("❌ HttpContactRepository: Contact creation failed - \(error)")
+            throw error
         }
-        
-        contacts.append(contact)
-        return contact
     }
-    
+
     func updateContact(_ contact: Contact) async throws -> Contact {
         try await Task.sleep(nanoseconds: 600_000_000) // 0.6 seconds
         
@@ -62,10 +71,11 @@ final class HttpContactRepository: ContactRepositoryProtocol {
         }
         
         // Validate required fields
-        guard !contact.firstName.isEmpty, !contact.lastName.isEmpty else {
-            throw ContactError.invalidData("First name and last name are required")
+        guard !contact.firstName.isEmpty else {
+            throw ContactError.invalidData("First name is required")
         }
-        
+        _ = ISO8601DateFormatter()
+
         let updatedContact = Contact(
             id: contact.id,
             firstName: contact.firstName,
@@ -74,6 +84,8 @@ final class HttpContactRepository: ContactRepositoryProtocol {
             phoneNumber: contact.phoneNumber,
             dateOfBirth: contact.dateOfBirth,
             category: contact.category,
+            description: contact.description,
+            interests: contact.interests,
             avatar: contact.avatar,
             createdAt: contact.createdAt,
             updatedAt: Date()
@@ -99,7 +111,7 @@ final class HttpContactRepository: ContactRepositoryProtocol {
         let lowercasedQuery = query.lowercased()
         return contacts.filter { contact in
             contact.firstName.lowercased().contains(lowercasedQuery) ||
-            contact.lastName.lowercased().contains(lowercasedQuery) ||
+            ((contact.lastName?.lowercased().contains(lowercasedQuery)) != nil) ||
             contact.email?.lowercased().contains(lowercasedQuery) == true
         }.sorted { $0.firstName < $1.firstName }
     }
@@ -107,88 +119,6 @@ final class HttpContactRepository: ContactRepositoryProtocol {
     func getContactsByCategory(_ category: ContactCategory) async throws -> [Contact] {
         try await Task.sleep(nanoseconds: 200_000_000) // 0.2 seconds
         return contacts.filter { $0.category == category }.sorted { $0.firstName < $1.firstName }
-    }
-    
-    // MARK: - Private Methods
-    
-    private func loadMockData() {
-        let now = Date()
-        let calendar = Calendar.current
-        
-        contacts = [
-            Contact(
-                id: "1",
-                firstName: "John",
-                lastName: "Doe",
-                email: "john.doe@example.com",
-                phoneNumber: "+1234567890",
-                dateOfBirth: calendar.date(byAdding: .year, value: -28, to: now),
-                category: .friends,
-                avatar: nil,
-                createdAt: calendar.date(byAdding: .day, value: -30, to: now) ?? now,
-                updatedAt: calendar.date(byAdding: .day, value: -5, to: now) ?? now
-            ),
-            Contact(
-                id: "2",
-                firstName: "Jane",
-                lastName: "Smith",
-                email: "jane.smith@example.com",
-                phoneNumber: "+1987654321",
-                dateOfBirth: calendar.date(byAdding: .year, value: -32, to: now),
-                category: .family,
-                avatar: nil,
-                createdAt: calendar.date(byAdding: .day, value: -25, to: now) ?? now,
-                updatedAt: calendar.date(byAdding: .day, value: -3, to: now) ?? now
-            ),
-            Contact(
-                id: "3",
-                firstName: "Mike",
-                lastName: "Johnson",
-                email: "mike.johnson@company.com",
-                phoneNumber: "+1122334455",
-                dateOfBirth: calendar.date(byAdding: .year, value: -35, to: now),
-                category: .colleagues,
-                avatar: nil,
-                createdAt: calendar.date(byAdding: .day, value: -20, to: now) ?? now,
-                updatedAt: calendar.date(byAdding: .day, value: -1, to: now) ?? now
-            ),
-            Contact(
-                id: "4",
-                firstName: "Sarah",
-                lastName: "Wilson",
-                email: "sarah.wilson@example.com",
-                phoneNumber: nil,
-                dateOfBirth: calendar.date(byAdding: .year, value: -29, to: now),
-                category: .friends,
-                avatar: nil,
-                createdAt: calendar.date(byAdding: .day, value: -15, to: now) ?? now,
-                updatedAt: calendar.date(byAdding: .day, value: -2, to: now) ?? now
-            ),
-            Contact(
-                id: "5",
-                firstName: "David",
-                lastName: "Brown",
-                email: "david.brown@family.com",
-                phoneNumber: "+1555666777",
-                dateOfBirth: calendar.date(byAdding: .year, value: -45, to: now),
-                category: .family,
-                avatar: nil,
-                createdAt: calendar.date(byAdding: .day, value: -10, to: now) ?? now,
-                updatedAt: now
-            ),
-            Contact(
-                id: "6",
-                firstName: "Emily",
-                lastName: "Davis",
-                email: "emily.davis@example.com",
-                phoneNumber: "+1333222111",
-                dateOfBirth: calendar.date(byAdding: .year, value: -26, to: now),
-                category: .other,
-                avatar: nil,
-                createdAt: calendar.date(byAdding: .day, value: -8, to: now) ?? now,
-                updatedAt: now
-            )
-        ]
     }
 }
 

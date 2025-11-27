@@ -17,14 +17,14 @@ struct ContactCard: View {
                 // Avatar
                 ContactAvatar(
                     firstName: contact.firstName,
-                    lastName: contact.lastName,
+                    lastName: contact.lastName ?? "",
                     size: 50
                 )
                 
                 // Contact info
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 8) {
-                        Text("\(contact.firstName) \(contact.lastName)")
+                        Text("\(contact.firstName) \(contact.lastName ?? "")")
                             .font(.system(size: 16, weight: .semibold, design: .rounded))
                             .foregroundColor(Color(red: 0.45, green: 0.3, blue: 0.6))
                         
@@ -90,45 +90,4 @@ struct ContactCard: View {
         }
         .buttonStyle(PlainButtonStyle())
     }
-}
-
-#Preview {
-    let sampleContact1 = Contact(
-        id: "1",
-        firstName: "John",
-        lastName: "Doe",
-        email: "john@example.com",
-        phoneNumber: "+1234567890",
-        dateOfBirth: Date(),
-        category: .friends,
-        avatar: nil,
-        createdAt: Date(),
-        updatedAt: Date()
-    )
-    
-    let sampleContact2 = Contact(
-        id: "2",
-        firstName: "Jane",
-        lastName: "Smith",
-        email: nil,
-        phoneNumber: nil,
-        dateOfBirth: Date(),
-        category: .family,
-        avatar: nil,
-        createdAt: Date(),
-        updatedAt: Date()
-    )
-    
-    return VStack(spacing: 12) {
-        ContactCard(
-            contact: sampleContact1,
-            hasUpcomingEvent: true
-        ) { }
-        
-        ContactCard(
-            contact: sampleContact2,
-            hasUpcomingEvent: false
-        ) { }
-    }
-    .padding()
 }

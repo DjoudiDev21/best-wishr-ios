@@ -4,23 +4,25 @@ import SwiftUI
 struct Contact: Identifiable, Codable, Equatable {
     let id: String
     let firstName: String
-    let lastName: String
+    let lastName: String?
     let email: String?
     let phoneNumber: String?
     let dateOfBirth: Date?
     let category: ContactCategory
+    let description: String?
+    let interests: [String]?
     let avatar: String?
     let createdAt: Date
     let updatedAt: Date
     
     var fullName: String {
-        "\(firstName) \(lastName)"
+        "\(firstName) \(lastName ?? "")"
     }
     
     var initials: String {
         let firstInitial = firstName.prefix(1).uppercased()
-        let lastInitial = lastName.prefix(1).uppercased()
-        return "\(firstInitial)\(lastInitial)"
+        let lastInitial = lastName?.prefix(1).uppercased()
+        return "\(firstInitial)\(lastInitial ?? "")"
     }
 }
 
@@ -60,11 +62,12 @@ struct ContactCreationData {
     var phoneNumber: String = ""
     var dateOfBirth: Date? = nil
     var category: ContactCategory = .family
+    var description: String = ""
+    var interests: [String] = []
     var hasBirthday: Bool = false
     
     var isValid: Bool {
-        !firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        !lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        !firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
     
     func toContact() -> Contact {
@@ -72,11 +75,13 @@ struct ContactCreationData {
         return Contact(
             id: UUID().uuidString,
             firstName: firstName.trimmingCharacters(in: .whitespacesAndNewlines),
-            lastName: lastName.trimmingCharacters(in: .whitespacesAndNewlines),
+            lastName: lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : lastName.trimmingCharacters(in: .whitespacesAndNewlines),
             email: email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : email.trimmingCharacters(in: .whitespacesAndNewlines),
             phoneNumber: phoneNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : phoneNumber.trimmingCharacters(in: .whitespacesAndNewlines),
             dateOfBirth: hasBirthday ? dateOfBirth : nil,
             category: category,
+            description: description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : description.trimmingCharacters(in: .whitespacesAndNewlines),
+            interests: interests.isEmpty ? nil : interests,
             avatar: nil,
             createdAt: now,
             updatedAt: now

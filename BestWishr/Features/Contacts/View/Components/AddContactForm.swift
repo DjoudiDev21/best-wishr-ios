@@ -151,6 +151,18 @@ struct AddContactForm: View {
                 }
                 .transition(.slide)
             }
+            
+            // Description
+            AddContactFormField(title: "Description", required: false) {
+                TextField("Add a note about this contact...", text: $contactData.description, axis: .vertical)
+                    .textFieldStyle(AddContactTextAreaStyle())
+                    .lineLimit(3...6)
+            }
+            
+            // Interests
+            AddContactFormField(title: "Interests", required: false) {
+                AddContactInterestsField(interests: $contactData.interests)
+            }
         }
     }
 }
@@ -227,5 +239,146 @@ struct AddContactTextFieldStyle: TextFieldStyle {
                             .stroke(Color.gray.opacity(0.3), lineWidth: 1)
                     )
             )
+    }
+}
+
+struct AddContactTextAreaStyle: TextFieldStyle {
+    func _body(configuration: TextField<Self._Label>) -> some View {
+        configuration
+            .padding()
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(.ultraThinMaterial)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                    )
+            )
+    }
+}
+
+struct AddContactInterestsField: View {
+    @Binding var interests: [String]
+    @State private var newInterest: String = ""
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Add Interest Input
+            HStack(spacing: 8) {
+                TextField("Add an interest...", text: $newInterest)
+                    .textFieldStyle(AddContactTextFieldStyle())
+                    .onSubmit {
+                        addInterest()
+                    }
+                
+                Button(action: addInterest) {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.system(size: 20))
+                        .foregroundColor(Color(red: 0.65, green: 0.3, blue: 0.8))
+                }
+                .disabled(newInterest.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            }
+            
+            // Interests Tags
+            if !interests.isEmpty {
+                FlowLayout(spacing: 8) {
+                    ForEach(Array(interests.enumerated()), id: \.offset) { index, interest in
+                        HStack(spacing: 6) {
+                            Text(interest)
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.primary)
+                            
+                            Button(action: {
+                                interests.remove(at: index)
+                            }) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(Color(red: 0.65, green: 0.3, blue: 0.8).opacity(0.1))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .stroke(Color(red: 0.65, green: 0.3, blue: 0.8).opacity(0.3), lineWidth: 1)
+                                )
+                        )
+                    }
+                }
+            }
+        }
+    }
+    
+    private func addInterest() {
+        let trimmedInterest = newInterest.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmedInterest.isEmpty && !interests.contains(trimmedInterest) {
+            interests.append(trimmedInterest)
+            newInterest = ""
+        }
+    }
+}
+
+struct FlowLayout: Layout {
+    var spacing: CGFloat
+    
+    init(spacing: CGFloat = 8) {
+        self.spacing = spacing
+    }
+    
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let result = FlowResult(
+            in: proposal.replacingUnspecifiedDimensions().width,
+            subviews: subviews,
+            spacing: spacing
+        )
+        return result.bounds
+    }
+    
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let result = FlowResult(
+            in: proposal.replacingUnspecifiedDimensions().width,
+            subviews: subviews,
+            spacing: spacing
+        )
+        for (index, subview) in subviews.enumerated() {
+            subview.place(at: CGPoint(x: bounds.minX + result.frames[index].minX,
+                                      y: bounds.minY + result.frames[index].minY),
+                          proposal: ProposedViewSize(result.frames[index].size))
+        }
+    }
+    
+    struct FlowResult {
+        var bounds = CGSize.zero
+        var frames: [CGRect] = []
+        
+        init(in maxWidth: CGFloat, subviews: Layout.Subviews, spacing: CGFloat) {
+            var origin = CGPoint.zero
+            var rowHeight: CGFloat = 0
+            
+            for subview in subviews {
+                let size = subview.sizeThatFits(.unspecified)
+                
+                if origin.x + size.width > maxWidth {
+                    // Move to next row
+                    origin.x = 0
+                    origin.y += rowHeight + spacing
+                    rowHeight = 0
+                }
+                
+                frames.append(CGRect(origin: origin, size: size))
+                
+                // Update for next iteration
+                origin.x += size.width + spacing
+                rowHeight = max(rowHeight, size.height)
+            }
+            
+            bounds = CGSize(
+                width: maxWidth,
+                height: origin.y + rowHeight
+            )
+        }
     }
 }

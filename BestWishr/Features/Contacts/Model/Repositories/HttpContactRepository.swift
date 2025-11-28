@@ -64,35 +64,29 @@ final class HttpContactRepository: ContactRepositoryProtocol {
     }
 
     func updateContact(_ contact: Contact) async throws -> Contact {
-        try await Task.sleep(nanoseconds: 600_000_000) // 0.6 seconds
+        print("🔄 HttpContactRepository: Starting contact update")
+        print("🔄 HttpContactRepository: Contact - ID: \(contact.id), firstName: \(contact.firstName), lastName: \(contact.lastName ?? "")")
         
-        guard let index = contacts.firstIndex(where: { $0.id == contact.id }) else {
-            throw ContactError.notFound
+        guard let ownerId = userIdProvider() else {
+            print("❌ HttpContactRepository: No user ID available for contact update")
+            throw ContactError.invalidData("User ID not available")
         }
         
-        // Validate required fields
-        guard !contact.firstName.isEmpty else {
-            throw ContactError.invalidData("First name is required")
+        do {
+            let body = contact.toRequestDto(ownerId: ownerId)
+            print("🔄 HttpContactRepository: Converted to DTO, making HTTP PUT request")
+            
+            let responseDto: ContactResponseDto = try await httpClient.put(.updateContact(contact.id), body: body)
+            print("✅ HttpContactRepository: HTTP request succeeded")
+            print("🔄 HttpContactRepository: Response DTO - ID: \(responseDto.id), firstName: \(responseDto.firstName)")
+            
+            let updatedContact = responseDto.toEntity()
+            print("✅ HttpContactRepository: Contact update completed - Final ID: \(updatedContact.id)")
+            return updatedContact
+        } catch {
+            print("❌ HttpContactRepository: Contact update failed - \(error)")
+            throw error
         }
-        _ = ISO8601DateFormatter()
-
-        let updatedContact = Contact(
-            id: contact.id,
-            firstName: contact.firstName,
-            lastName: contact.lastName,
-            email: contact.email,
-            phoneNumber: contact.phoneNumber,
-            dateOfBirth: contact.dateOfBirth,
-            category: contact.category,
-            description: contact.description,
-            interests: contact.interests,
-            avatar: contact.avatar,
-            createdAt: contact.createdAt,
-            updatedAt: Date()
-        )
-        
-        contacts[index] = updatedContact
-        return updatedContact
     }
     
     func deleteContact(id: String) async throws {

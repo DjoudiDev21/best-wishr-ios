@@ -12,6 +12,7 @@ enum ApiEndpoint {
     case authSocialMobile
     case listContacts(ownerId: String)
     case createContact
+    case updateContact(String)
     case listEvents(ownerId: String)
     case createEvent
     case updateEvent(String)
@@ -58,6 +59,7 @@ enum ApiEndpoint {
         case .authSocialMobile: return "auth/social/mobile"
         case .listContacts: return "contacts"
         case .createContact: return "contacts"
+        case .updateContact(let id): return "contacts/\(id)"
         case .listEvents: return "events"
         case .createEvent: return "events"
         case .updateEvent(let id): return "events/\(id)"
@@ -78,7 +80,7 @@ enum ApiEndpoint {
             return "POST"
         case .listContacts, .listEvents, .listGifts:
             return "GET"
-        case .updateEvent, .updateGift:
+        case .updateContact, .updateEvent, .updateGift:
             return "PUT"
         case .deleteEvent, .deleteGift, .removeFromWishlist:
             return "DELETE"

@@ -42,10 +42,12 @@ final class AppStore: ObservableObject {
         )
         let getContactsUseCase = GetContactsUseCase(repository: contactsRepository)
         let createContactUseCase = CreateContactUseCase(repository: contactsRepository)
+        let updateContactUseCase = UpdateContactUseCase(repository: contactsRepository)
         let deleteContactUseCase = DeleteContactUseCase(repository: contactsRepository)
         let contactsPresenter = ContactsPresenter(
             getContactsUseCase: getContactsUseCase,
             createContactUseCase: createContactUseCase,
+            updateContactUseCase: updateContactUseCase,
             deleteContactUseCase: deleteContactUseCase
         )
         self.contactsStore = ContactsStore(presenter: contactsPresenter)

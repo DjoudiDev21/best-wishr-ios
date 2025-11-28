@@ -99,6 +99,35 @@ final class ContactsStore: ObservableObject {
         }
     }
     
+    func updateContact(_ contact: Contact) async -> Bool {
+        print("🏪 ContactsStore: Starting contact update")
+        print("🏪 ContactsStore: Contact - ID: \(contact.id), firstName: \(contact.firstName), lastName: \(contact.lastName ?? "")")
+        
+        isLoading = true
+        error = nil
+        
+        let result = await presenter.updateContact(contact)
+        
+        switch result {
+        case .success(let updatedContact):
+            print("✅ ContactsStore: Contact updated successfully - ID: \(updatedContact.id)")
+            // Find and update the contact in the array
+            if let index = contacts.firstIndex(where: { $0.id == updatedContact.id }) {
+                contacts[index] = updatedContact
+                contacts = contacts.sorted { $0.firstName < $1.firstName }
+                print("🏪 ContactsStore: Updated contacts list")
+            }
+            isLoading = false
+            return true
+        case .failure(let updateError):
+            print("❌ ContactsStore: Contact update failed - \(updateError)")
+            error = updateError
+            errorHandler.handle(updateError)
+            isLoading = false
+            return false
+        }
+    }
+    
     func deleteContact(id: String) async -> Bool {
         isLoading = true
         error = nil

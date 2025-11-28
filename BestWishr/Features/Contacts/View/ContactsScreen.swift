@@ -3,6 +3,7 @@ import SwiftUI
 struct ContactsScreen: View {
     @EnvironmentObject var viewModel: ContactsViewModel
     @EnvironmentObject var addContactViewModel: AddContactViewModel
+    @EnvironmentObject var appStore: AppStore
     
     
     var body: some View {
@@ -87,6 +88,14 @@ struct ContactsScreen: View {
         }
         .sheet(isPresented: $viewModel.showingAddContact) {
             AddContactScreen()
+        }
+        .sheet(isPresented: $viewModel.showingContactDetail) {
+            if let selectedContact = viewModel.selectedContact {
+                ContactDetailScreen(
+                    contact: selectedContact,
+                    contactsStore: appStore.contactsStore
+                )
+            }
         }
     }
 }

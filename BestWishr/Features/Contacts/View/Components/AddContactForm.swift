@@ -30,11 +30,33 @@ struct AddContactForm: View {
             
             // Phone Number
             AddContactFormField(title: "Phone Number", required: false) {
-                TextField("(555) 123-4567", text: $contactData.phoneNumber)
-                    .textFieldStyle(AddContactTextFieldStyle())
-                #if os(iOS)
-                    .keyboardType(.phonePad)
-                #endif
+                
+                HStack(spacing: 8) {
+                    // Country Picker (Menu)
+                    Menu {
+                        ForEach(Country.allCountries) { country in
+                            Button(action: { contactData.phoneCountry = country }) {
+                                Text(country.displayName)
+                            }
+                        }
+                    } label: {
+                        HStack {
+                            Text(contactData.phoneCountry.phoneCode)
+                                .font(.body)
+                            Image(systemName: "chevron.down")
+                                .font(.caption)
+                        }
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 8)
+                        .background(Color.gray.opacity(0.1))
+                        .cornerRadius(8)
+                    }
+                    TextField("(555) 123-4567", text: $contactData.phoneNumber)
+                        .textFieldStyle(AddContactTextFieldStyle())
+                    #if os(iOS)
+                        .keyboardType(.phonePad)
+                    #endif
+                }
             }
             
             // Category

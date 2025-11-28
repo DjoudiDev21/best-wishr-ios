@@ -22,6 +22,7 @@ final class ContactDetailViewModel: ObservableObject {
             lastName: contact.lastName ?? "",
             email: contact.email ?? "",
             phoneNumber: contact.phoneNumber ?? "",
+            phoneCountry: PhoneNumberValidator.detectCountryFromPhoneNumber(contact.phoneNumber),
             dateOfBirth: contact.dateOfBirth,
             category: contact.category,
             description: contact.description ?? "",
@@ -43,6 +44,7 @@ final class ContactDetailViewModel: ObservableObject {
             lastName: contact.lastName ?? "",
             email: contact.email ?? "",
             phoneNumber: contact.phoneNumber ?? "",
+            phoneCountry: PhoneNumberValidator.detectCountryFromPhoneNumber(contact.phoneNumber),
             dateOfBirth: contact.dateOfBirth,
             category: contact.category,
             description: contact.description ?? "",
@@ -59,19 +61,19 @@ final class ContactDetailViewModel: ObservableObject {
     func saveContact() async -> Bool {
         guard canSave else { return false }
         
-        print("📝 ContactDetailViewModel: Starting contact update")
-        print("📝 ContactDetailViewModel: Updated data - firstName: \(editableData.firstName), lastName: \(editableData.lastName)")
         
         isLoading = true
         error = nil
         
-        // Create updated contact with preserved ID and timestamps
+        let trimmedPhoneNumber = editableData.phoneNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : editableData.phoneNumber.trimmingCharacters(in: .whitespacesAndNewlines)
+        let formattedPhoneNumber = PhoneNumberValidator.validateAndFormat(trimmedPhoneNumber, country: editableData.phoneCountry)
+
         let updatedContact = Contact(
             id: contact.id,
             firstName: editableData.firstName.trimmingCharacters(in: .whitespacesAndNewlines),
             lastName: editableData.lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : editableData.lastName.trimmingCharacters(in: .whitespacesAndNewlines),
             email: editableData.email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : editableData.email.trimmingCharacters(in: .whitespacesAndNewlines),
-            phoneNumber: editableData.phoneNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : editableData.phoneNumber.trimmingCharacters(in: .whitespacesAndNewlines),
+            phoneNumber: formattedPhoneNumber,
             dateOfBirth: editableData.hasBirthday ? editableData.dateOfBirth : nil,
             category: editableData.category,
             description: editableData.description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : editableData.description.trimmingCharacters(in: .whitespacesAndNewlines),
@@ -80,16 +82,13 @@ final class ContactDetailViewModel: ObservableObject {
             createdAt: contact.createdAt,
             updatedAt: Date()
         )
-        
+
         // Use the contactsStore to update the contact
         let success = await contactsStore.updateContact(updatedContact)
         
         if success {
-            print("✅ ContactDetailViewModel: Contact update succeeded")
             contact = updatedContact
             isEditing = false
-        } else {
-            print("❌ ContactDetailViewModel: Contact update failed")
         }
         
         isLoading = false
@@ -97,16 +96,7 @@ final class ContactDetailViewModel: ObservableObject {
     }
     
     func deleteContact() async -> Bool {
-        print("🗑️ ContactDetailViewModel: Starting contact deletion")
-        
         let success = await contactsStore.deleteContact(id: contact.id)
-        
-        if success {
-            print("✅ ContactDetailViewModel: Contact deletion succeeded")
-        } else {
-            print("❌ ContactDetailViewModel: Contact deletion failed")
-        }
-        
         return success
     }
     

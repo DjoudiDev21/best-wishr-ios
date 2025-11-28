@@ -60,6 +60,7 @@ struct ContactCreationData {
     var lastName: String = ""
     var email: String = ""
     var phoneNumber: String = ""
+    var phoneCountry: Country = Country.default
     var dateOfBirth: Date? = nil
     var category: ContactCategory = .family
     var description: String = ""
@@ -72,12 +73,19 @@ struct ContactCreationData {
     
     func toContact() -> Contact {
         let now = Date()
+        
+        // Format phone number with selected country
+        let formattedPhoneNumber = PhoneNumberValidator.validateAndFormat(
+            phoneNumber.trimmingCharacters(in: .whitespacesAndNewlines),
+            country: phoneCountry
+        )
+        
         return Contact(
             id: UUID().uuidString,
             firstName: firstName.trimmingCharacters(in: .whitespacesAndNewlines),
             lastName: lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : lastName.trimmingCharacters(in: .whitespacesAndNewlines),
             email: email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : email.trimmingCharacters(in: .whitespacesAndNewlines),
-            phoneNumber: phoneNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : phoneNumber.trimmingCharacters(in: .whitespacesAndNewlines),
+            phoneNumber: formattedPhoneNumber,
             dateOfBirth: hasBirthday ? dateOfBirth : nil,
             category: category,
             description: description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : description.trimmingCharacters(in: .whitespacesAndNewlines),

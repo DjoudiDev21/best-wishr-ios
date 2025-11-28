@@ -30,12 +30,39 @@ struct ContactDetailScreen: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 20)
                 .overlay(
-                    // Floating Edit Button (fallback if toolbar doesn't work)
+                    // Floating Buttons
                     VStack {
                         Spacer()
                         HStack {
+                            // Close Button (always visible)
+                            Button(action: {
+                                if viewModel.isEditing {
+                                    viewModel.cancelEditing()
+                                } else {
+                                    dismiss()
+                                }
+                            }) {
+                                Image(systemName: "xmark")
+                                    .font(.system(size: 16, weight: .semibold))
+                                    .foregroundColor(.white)
+                                    .frame(width: 50, height: 50)
+                                    .background(
+                                        LinearGradient(
+                                            colors: [
+                                                Color.gray.opacity(0.8),
+                                                Color.gray.opacity(0.6)
+                                            ],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    )
+                                    .cornerRadius(25)
+                                    .shadow(color: Color.gray.opacity(0.3), radius: 8, x: 0, y: 4)
+                            }
+                            
                             Spacer()
                             
+                            // Edit/Save Buttons
                             if !viewModel.isEditing {
                                 Button(action: {
                                     viewModel.startEditing()
@@ -63,38 +90,27 @@ struct ContactDetailScreen: View {
                                     .shadow(color: Color(red: 0.65, green: 0.3, blue: 0.8).opacity(0.3), radius: 10, x: 0, y: 5)
                                 }
                             } else {
-                                HStack(spacing: 12) {
-                                    Button("Cancel") {
-                                        viewModel.cancelEditing()
+                                Button("Save") {
+                                    Task {
+                                        await viewModel.saveContact()
                                     }
-                                    .padding(.horizontal, 20)
-                                    .padding(.vertical, 12)
-                                    .background(Color.secondary.opacity(0.2))
-                                    .foregroundColor(.secondary)
-                                    .cornerRadius(20)
-                                    
-                                    Button("Save") {
-                                        Task {
-                                            await viewModel.saveContact()
-                                        }
-                                    }
-                                    .disabled(!viewModel.canSave)
-                                    .padding(.horizontal, 24)
-                                    .padding(.vertical, 12)
-                                    .background(
-                                        LinearGradient(
-                                            colors: [
-                                                viewModel.canSave ? Color(red: 0.65, green: 0.3, blue: 0.8) : Color.gray,
-                                                viewModel.canSave ? Color(red: 0.75, green: 0.4, blue: 0.9) : Color.gray
-                                            ],
-                                            startPoint: .topLeading,
-                                            endPoint: .bottomTrailing
-                                        )
-                                    )
-                                    .foregroundColor(.white)
-                                    .cornerRadius(20)
-                                    .shadow(color: (viewModel.canSave ? Color(red: 0.65, green: 0.3, blue: 0.8) : Color.gray).opacity(0.3), radius: 8, x: 0, y: 4)
                                 }
+                                .disabled(!viewModel.canSave)
+                                .padding(.horizontal, 24)
+                                .padding(.vertical, 12)
+                                .background(
+                                    LinearGradient(
+                                        colors: [
+                                            viewModel.canSave ? Color(red: 0.65, green: 0.3, blue: 0.8) : Color.gray,
+                                            viewModel.canSave ? Color(red: 0.75, green: 0.4, blue: 0.9) : Color.gray
+                                        ],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .foregroundColor(.white)
+                                .cornerRadius(25)
+                                .shadow(color: (viewModel.canSave ? Color(red: 0.65, green: 0.3, blue: 0.8) : Color.gray).opacity(0.3), radius: 8, x: 0, y: 4)
                             }
                         }
                         .padding(.horizontal, 20)
@@ -103,8 +119,7 @@ struct ContactDetailScreen: View {
                     alignment: .bottom
                 )
             }
-            .navigationTitle("Contact Details")
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarHidden(true)
             .overlay(
                 // Loading overlay
                 Group {
@@ -126,38 +141,6 @@ struct ContactDetailScreen: View {
                     }
                 }
             )
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Close") {
-                        if viewModel.isEditing {
-                            viewModel.cancelEditing()
-                        } else {
-                            dismiss()
-                        }
-                    }
-                    .foregroundColor(Color(red: 0.65, green: 0.3, blue: 0.8))
-                }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    if viewModel.isEditing {
-                        Button("Save") {
-                            Task {
-                                let success = await viewModel.saveContact()
-                                if success {
-                                    // Stay on screen to show updated contact
-                                }
-                            }
-                        }
-                        .disabled(!viewModel.canSave)
-                        .foregroundColor(viewModel.canSave ? Color(red: 0.65, green: 0.3, blue: 0.8) : .gray)
-                    } else {
-                        Button("Edit") {
-                            viewModel.startEditing()
-                        }
-                        .foregroundColor(Color(red: 0.65, green: 0.3, blue: 0.8))
-                    }
-                }
-            }
         }
     }
 }

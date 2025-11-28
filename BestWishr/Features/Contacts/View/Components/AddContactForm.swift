@@ -30,27 +30,48 @@ struct AddContactForm: View {
             
             // Phone Number
             AddContactFormField(title: "Phone Number", required: false) {
-                
                 HStack(spacing: 8) {
-                    // Country Picker (Menu)
+                    // Country Picker (Compact)
                     Menu {
                         ForEach(Country.allCountries) { country in
                             Button(action: { contactData.phoneCountry = country }) {
-                                Text(country.displayName)
+                                HStack {
+                                    Text(country.displayName)
+                                        .foregroundColor(.primary)
+                                    Spacer()
+                                    if contactData.phoneCountry.id == country.id {
+                                        Image(systemName: "checkmark")
+                                            .font(.system(size: 12))
+                                            .foregroundColor(.blue)
+                                    }
+                                }
                             }
                         }
                     } label: {
-                        HStack {
+                        HStack(spacing: 6) {
+                            Text(contactData.phoneCountry.flag)
+                                .font(.title3)
                             Text(contactData.phoneCountry.phoneCode)
-                                .font(.body)
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.primary)
                             Image(systemName: "chevron.down")
-                                .font(.caption)
+                                .font(.system(size: 10, weight: .medium))
+                                .foregroundColor(.secondary)
                         }
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 8)
-                        .background(Color.gray.opacity(0.1))
-                        .cornerRadius(8)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(.ultraThinMaterial)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                )
+                        )
                     }
+                    .fixedSize(horizontal: true, vertical: false)
+                    
+                    // Phone Number Input
                     TextField("(555) 123-4567", text: $contactData.phoneNumber)
                         .textFieldStyle(AddContactTextFieldStyle())
                     #if os(iOS)

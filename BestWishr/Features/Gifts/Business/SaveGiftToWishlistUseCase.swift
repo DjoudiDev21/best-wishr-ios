@@ -1,9 +1,9 @@
 import Foundation
 
 class SaveGiftToWishlistUseCase {
-    private let repository: GiftRepository
+    private let repository: GiftRepositoryProtocol
     
-    init(repository: GiftRepository) {
+    init(repository: GiftRepositoryProtocol) {
         self.repository = repository
     }
     

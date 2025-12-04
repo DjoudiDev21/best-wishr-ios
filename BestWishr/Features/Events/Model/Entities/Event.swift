@@ -4,8 +4,8 @@ struct Event: Identifiable, Codable, Hashable {
     let id: String
     let title: String
     let description: String?
-    let eventType: EventType
-    let contactId: String? // Links to contact if event is for someone
+    let type: EventType
+    let contactId: String?
     let date: Date
     let recurrence: RecurrenceRule?
     let reminders: [EventReminder]
@@ -17,7 +17,7 @@ struct Event: Identifiable, Codable, Hashable {
         id: String = UUID().uuidString,
         title: String,
         description: String? = nil,
-        eventType: EventType,
+        type: EventType,
         contactId: String? = nil,
         date: Date,
         recurrence: RecurrenceRule? = nil,
@@ -29,7 +29,7 @@ struct Event: Identifiable, Codable, Hashable {
         self.id = id
         self.title = title
         self.description = description
-        self.eventType = eventType
+        self.type = type
         self.contactId = contactId
         self.date = date
         self.recurrence = recurrence
@@ -76,37 +76,69 @@ struct Event: Identifiable, Codable, Hashable {
 struct EventCreationData {
     var title: String = ""
     var description: String = ""
-    var eventType: EventType = .birthday
+    var type: EventType = .birthday
     var contactId: String? = nil
     var date: Date = Date()
     var isRecurring: Bool = false
     var hasReminders: Bool = true
+    var selectedReminderIntervals: Set<ReminderInterval> = []
     var giftSuggestionsEnabled: Bool = false
     
     var isValid: Bool {
         !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
     
+    var canGenerateGiftSuggestions: Bool {
+        // Gift suggestions require at minimum an event type and date
+        // Title is also recommended for better context
+        return !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+    
+    // MARK: - Reminder Logic
+    
+    func availableReminderIntervals() -> [ReminderInterval] {
+        let timeUntilEvent = date.timeIntervalSince(Date())
+        let safetyBuffer: TimeInterval = 60 // 1 minute safety buffer
+        
+        return ReminderInterval.allCases.filter { interval in
+            interval.timeInterval < timeUntilEvent - safetyBuffer
+        }.sorted { $0.timeInterval > $1.timeInterval } // Largest intervals first
+    }
+    
+    func isReminderIntervalAvailable(_ interval: ReminderInterval) -> Bool {
+        return availableReminderIntervals().contains(interval)
+    }
+    
+    func suggestedReminderIntervals() -> Set<ReminderInterval> {
+        let available = Set(availableReminderIntervals())
+        let defaults = Set(type.defaultReminders)
+        return defaults.intersection(available)
+    }
+    
     func toEvent() -> Event {
         let recurrence = isRecurring ? RecurrenceRule(frequency: .yearly) : nil
-        let reminders = hasReminders ? eventType.defaultReminders : []
+        
+        // Use user-selected reminders instead of automatic generation
+        let reminders = hasReminders ? Array(selectedReminderIntervals).map { interval in
+            EventReminder(interval: interval)
+        } : []
         
         return Event(
             title: title.trimmingCharacters(in: .whitespacesAndNewlines),
             description: description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : description.trimmingCharacters(in: .whitespacesAndNewlines),
-            eventType: eventType,
+            type: type,
             contactId: contactId,
             date: date,
             recurrence: recurrence,
-            reminders: reminders as! [EventReminder]
+            reminders: reminders
         )
     }
 }
 
 extension EventCreationData {
-    init(title: String, eventType: EventType, contactId: String? = nil) {
+    init(title: String, type: EventType, contactId: String? = nil) {
         self.title = title
-        self.eventType = eventType
+        self.type = type
         self.contactId = contactId
     }
 }

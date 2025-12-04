@@ -58,8 +58,8 @@ struct TodaysNotificationsView: View {
                         NotificationCard(
                             icon: "calendar",
                             title: event.title,
-                            message: "Today is \(event.eventType.rawValue.lowercased())",
-                            color: event.eventType.color,
+                            message: "Today is \(event.type.rawValue.lowercased())",
+                            color: event.type.color,
                             isToday: true
                         )
                     }

@@ -23,32 +23,26 @@ class ContactsPresenter: ContactsPresenterProtocol {
     }
     
     func createContact(_ contactData: ContactCreationData) async -> Result<Contact, Error> {
-        print("🎭 ContactsPresenter: Received create contact request")
-        print("🎭 ContactsPresenter: Contact data - firstName: \(contactData.firstName), lastName: \(contactData.lastName)")
-        
         let result = await createContactUseCase.execute(contactData)
         
         switch result {
         case .success(let contact):
-            print("✅ ContactsPresenter: CreateContactUseCase succeeded - Contact ID: \(contact.id)")
+            break
         case .failure(let error):
-            print("❌ ContactsPresenter: CreateContactUseCase failed - \(error)")
+            break
         }
         
         return result
     }
     
     func updateContact(_ contact: Contact) async -> Result<Contact, Error> {
-        print("🎭 ContactsPresenter: Received update contact request")
-        print("🎭 ContactsPresenter: Contact - ID: \(contact.id), firstName: \(contact.firstName), lastName: \(contact.lastName ?? "")")
-        
         let result = await updateContactUseCase.execute(contact)
         
         switch result {
         case .success(let updatedContact):
-            print("✅ ContactsPresenter: UpdateContactUseCase succeeded - Contact ID: \(updatedContact.id)")
+            break
         case .failure(let error):
-            print("❌ ContactsPresenter: UpdateContactUseCase failed - \(error)")
+            break
         }
         
         return result

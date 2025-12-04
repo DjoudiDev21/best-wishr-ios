@@ -65,17 +65,10 @@ struct BestWishrApp: App {
     }
     
     private func handleURL(url: URL) {
-        print("🔗 BestWishrApp: Received URL: \(url)")
         if urlManager.handleURL(url: url) {
-            print("🔗 BestWishrApp: URL handled successfully")
             if let destination = urlManager.activeDestination {
-                print("🔗 BestWishrApp: Active destination: \(destination)")
                 handleDeeplink(destination)
-            } else {
-                print("❌ BestWishrApp: No active destination found")
             }
-        } else {
-            print("❌ BestWishrApp: URL not handled")
         }
     }
 
@@ -83,24 +76,20 @@ struct BestWishrApp: App {
         Task {
             switch destination {
                 case .verifyEmail(let token, let email):
-                    print("🔗 BestWishrApp: Processing email verification link")
                     
                     // Check token validity before making API call
                     if JWTDecoder.isTokenValid(token) {
-                        print("🔗 BestWishrApp: Token is valid, proceeding with verification")
                         urlManager.setProcessingState(true)
                         _ = await appStore.authStore.verifyEmailAndLogin(token: token, email: email)
                         urlManager.setProcessingState(false)
                         urlManager.clearActiveDestination()
                     } else {
-                        print("🔗 BestWishrApp: Token is expired, showing banner directly")
                         // Token is expired, reuse existing error handling logic
                         appStore.authStore.handleExpiredVerificationToken(email: email)
                         urlManager.clearActiveDestination()
                     }
 
                 case .resetPassword(let token, let email):
-                    print("🔗 BestWishrApp: Handling reset password deeplink - token: \(token.prefix(10))..., email: \(email)")
                     // Trigger the reset password UI in LoginScreen
                     urlManager.setResetPasswordMode(true)
         }

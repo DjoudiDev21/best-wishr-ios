@@ -42,20 +42,3 @@ struct GiftSuggestionsHeader: View {
         }
     }
 }
-
-#Preview {
-    VStack(spacing: 20) {
-        GiftSuggestionsHeader(
-            contactName: "John Doe",
-            eventType: .birthday,
-            hasContent: true
-        ) { }
-        
-        GiftSuggestionsHeader(
-            contactName: nil,
-            eventType: .anniversary,
-            hasContent: false
-        ) { }
-    }
-    .padding()
-}

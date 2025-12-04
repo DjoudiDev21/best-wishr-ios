@@ -11,21 +11,18 @@ final class HttpEventRepository: EventRepositoryProtocol {
     
     // MARK: - Event CRUD Operations
     func getEvents() async throws -> [Event] {
-        print("🏪 HttpEventRepository: Getting events...")
-        
         guard let ownerId = userIdProvider() else {
-            print("❌ HttpEventRepository: No user ID available")
             throw EventError.invalidData("User ID not available")
         }
         
-        print("🏪 HttpEventRepository: Using owner ID: \(ownerId)")
         
         do {
-            let events: [Event] = try await httpClient.get(.listEvents(ownerId: ownerId))
-            print("✅ HttpEventRepository: Successfully retrieved \(events.count) events")
-            return events.sorted { $0.date < $1.date }
+            let events: [GetEventsResponseDto] = try await httpClient.get(.listEvents(ownerId: ownerId))
+            return events
+                .map { $0.toEntity() }
+                .sorted { $0.date < $1.date }
+
         } catch {
-            print("❌ HttpEventRepository: Failed to get events - \(error)")
             throw error
         }
     }
@@ -61,7 +58,14 @@ final class HttpEventRepository: EventRepositoryProtocol {
     }
     
     func createEvent(_ event: Event) async throws -> Event {
-        return try await httpClient.post(.createEvent, body: event)
+        guard let ownerId = userIdProvider() else {
+            throw ContactError.invalidData("User ID not available")
+        }
+        
+        let body = event.toCreateRequestDto(ownerId: ownerId)
+        print("BODY CREATE EVENT: \(body)")
+        let responseDto: CreateEventResponseDto = try await httpClient.post(.createEvent, body: body)
+        return responseDto.toEntity()
     }
     
     func updateEvent(_ event: Event) async throws -> Event {
@@ -83,9 +87,9 @@ final class HttpEventRepository: EventRepositoryProtocol {
         }.sorted { $0.date < $1.date }
     }
     
-    func getEventsByType(_ eventType: EventType) async throws -> [Event] {
+    func getEventsByType(_ type: EventType) async throws -> [Event] {
         let allEvents = try await getEvents()
-        return allEvents.filter { $0.eventType == eventType }
+        return allEvents.filter { $0.type == type }
             .sorted { $0.date < $1.date }
     }
     

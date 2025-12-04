@@ -56,10 +56,9 @@ struct CreateEventUseCase {
             }
         }
         
-        // Validate reminders
-        if eventData.hasReminders {
-            let reminderIntervals = eventData.eventType.defaultReminders
-            let reminders = reminderIntervals.map { EventReminder(interval: $0) }
+        // Validate reminders (use user-selected reminders, not automatic defaults)
+        if eventData.hasReminders && !eventData.selectedReminderIntervals.isEmpty {
+            let reminders = Array(eventData.selectedReminderIntervals).map { EventReminder(interval: $0) }
             let reminderValidation = validateReminders(reminders, eventDate: eventData.date)
             if case .failure(let error) = reminderValidation {
                 return .failure(error)
@@ -96,11 +95,10 @@ struct CreateEventUseCase {
         guard reminders.count <= 10 else {
             return .failure(EventError.invalidData("Cannot have more than 10 reminders per event"))
         }
-        
         // Validate each reminder
         for reminder in reminders {
             let reminderDate = reminder.reminderDate(for: eventDate)
-            
+
             // Reminder cannot be in the past
             guard reminderDate >= Date() else {
                 return .failure(EventError.invalidData("Reminder time cannot be in the past"))

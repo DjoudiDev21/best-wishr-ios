@@ -13,12 +13,12 @@ struct EventCard: View {
                     // Event type icon
                     ZStack {
                         Circle()
-                            .fill(event.eventType.color.opacity(0.2))
+                            .fill(event.type.color.opacity(0.2))
                             .frame(width: 50, height: 50)
                         
-                        Image(systemName: event.eventType.icon)
+                        Image(systemName: event.type.icon)
                             .font(.system(size: 20, weight: .medium))
-                            .foregroundColor(event.eventType.color)
+                            .foregroundColor(event.type.color)
                     }
                     
                     // Date info
@@ -30,7 +30,7 @@ struct EventCard: View {
                         if event.isToday {
                             Text("Today")
                                 .font(.system(size: 10, weight: .bold, design: .rounded))
-                                .foregroundColor(event.eventType.color)
+                                .foregroundColor(event.type.color)
                         } else if event.isUpcoming && event.daysUntilEvent <= 7 {
                             Text("\(event.daysUntilEvent)d")
                                 .font(.system(size: 10, weight: .bold, design: .rounded))
@@ -67,16 +67,16 @@ struct EventCard: View {
                         // Event type badge
                         HStack(spacing: 4) {
                             Circle()
-                                .fill(event.eventType.color)
+                                .fill(event.type.color)
                                 .frame(width: 8, height: 8)
                             
-                            Text(event.eventType.rawValue)
+                            Text(event.type.rawValue)
                                 .font(.system(size: 12, weight: .medium, design: .rounded))
-                                .foregroundColor(event.eventType.color)
+                                .foregroundColor(event.type.color)
                         }
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
-                        .background(event.eventType.color.opacity(0.1))
+                        .background(event.type.color.opacity(0.1))
                         .cornerRadius(12)
                         
                         Spacer()
@@ -124,57 +124,10 @@ struct EventCard: View {
                     .fill(.ultraThinMaterial)
                     .overlay(
                         RoundedRectangle(cornerRadius: 16)
-                            .stroke(event.eventType.color.opacity(0.2), lineWidth: 1)
+                            .stroke(event.type.color.opacity(0.2), lineWidth: 1)
                     )
             )
         }
         .buttonStyle(PlainButtonStyle())
     }
-}
-
-#Preview {
-    VStack(spacing: 16) {
-        EventCard(
-            event: Event(
-                title: "John's Birthday",
-                description: "Celebrate John's 29th birthday with friends and family",
-                eventType: .birthday,
-                contactId: "1",
-                date: Calendar.current.date(byAdding: .day, value: 3, to: Date()) ?? Date(),
-                recurrence: RecurrenceRule(frequency: .yearly),
-                reminders: [EventReminder(interval: .oneDay)]
-            ),
-            contactName: "John Doe"
-        ) {
-            // Handle tap
-        }
-        
-        EventCard(
-            event: Event(
-                title: "Project Meeting",
-                description: "Quarterly planning session",
-                eventType: .meeting,
-                date: Date(),
-                reminders: [EventReminder(interval: .oneHour)]
-            ),
-            contactName: nil
-        ) {
-            // Handle tap
-        }
-        
-        EventCard(
-            event: Event(
-                title: "Wedding Anniversary",
-                description: "Our 5th anniversary celebration",
-                eventType: .anniversary,
-                date: Calendar.current.date(byAdding: .day, value: -5, to: Date()) ?? Date(),
-                recurrence: RecurrenceRule(frequency: .yearly),
-                isCompleted: true
-            ),
-            contactName: nil
-        ) {
-            // Handle tap
-        }
-    }
-    .padding()
 }

@@ -3,11 +3,8 @@ import SwiftUI
 
 enum EventType: String, CaseIterable, Identifiable, Codable {
     case birthday = "Birthday"
-    case anniversary = "Anniversary"
     case wedding = "Wedding"
     case graduation = "Graduation"
-    case holiday = "Holiday"
-    case meeting = "Meeting"
     case celebration = "Celebration"
     case other = "Other"
     
@@ -17,16 +14,10 @@ enum EventType: String, CaseIterable, Identifiable, Codable {
         switch self {
         case .birthday:
             return "birthday.cake"
-        case .anniversary:
-            return "heart.circle"
         case .wedding:
             return "heart"
         case .graduation:
             return "graduationcap"
-        case .holiday:
-            return "sun.max"
-        case .meeting:
-            return "person.2"
         case .celebration:
             return "party.popper"
         case .other:
@@ -38,16 +29,10 @@ enum EventType: String, CaseIterable, Identifiable, Codable {
         switch self {
         case .birthday:
             return Color(red: 1.0, green: 0.6, blue: 0.8) // Pink
-        case .anniversary:
-            return Color(red: 0.8, green: 0.2, blue: 0.4) // Deep red
         case .wedding:
             return Color(red: 0.9, green: 0.7, blue: 0.9) // Light purple
         case .graduation:
             return Color(red: 0.2, green: 0.6, blue: 0.9) // Blue
-        case .holiday:
-            return Color(red: 1.0, green: 0.8, blue: 0.2) // Gold
-        case .meeting:
-            return Color(red: 0.5, green: 0.7, blue: 0.9) // Light blue
         case .celebration:
             return Color(red: 0.6, green: 0.9, blue: 0.4) // Green
         case .other:
@@ -59,16 +44,10 @@ enum EventType: String, CaseIterable, Identifiable, Codable {
         switch self {
         case .birthday:
             return "Celebrate someone's special day"
-        case .anniversary:
-            return "Mark important milestones and memories"
         case .wedding:
             return "Celebrate the union of two people"
         case .graduation:
             return "Honor academic achievements"
-        case .holiday:
-            return "Seasonal and cultural celebrations"
-        case .meeting:
-            return "Professional and personal meetings"
         case .celebration:
             return "General celebrations and parties"
         case .other:
@@ -78,14 +57,10 @@ enum EventType: String, CaseIterable, Identifiable, Codable {
     
     var defaultReminders: [ReminderInterval] {
         switch self {
-        case .birthday, .anniversary:
+        case .birthday:
             return [.oneWeek, .threeDays, .oneDay]
         case .wedding, .graduation:
             return [.oneMonth, .oneWeek, .oneDay]
-        case .holiday:
-            return [.oneWeek, .oneDay]
-        case .meeting:
-            return [.oneHour, .fifteenMinutes]
         case .celebration:
             return [.threeDays, .oneDay]
         case .other:

@@ -36,7 +36,6 @@ struct JWTDecoder {
         do {
             return try JSONSerialization.jsonObject(with: data) as? [String: Any]
         } catch {
-            print("❌ JWT Decode Error: \(error)")
             return nil
         }
     }

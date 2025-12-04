@@ -22,6 +22,17 @@ enum ApiEndpoint {
     case updateGift(String)
     case deleteGift(String)
     case generateGiftSuggestions
+    case getGiftSuggestions(eventId: String?, contactId: String?, category: String?, isBookmarked: Bool?, isPurchased: Bool?, limit: Int?, offset: Int?)
+    case getBookmarkedSuggestions
+    case getPurchasedSuggestions
+    case getSuggestionsByEvent(String)
+    case getSuggestionsByContact(String)
+    case rateSuggestion
+    case updateSuggestion
+    case bookmarkSuggestion(String)
+    case unbookmarkSuggestion(String)
+    case markSuggestionAsPurchased(String)
+    case markSuggestionAsNotPurchased(String)
     case saveToWishlist
     case removeFromWishlist(String)
     
@@ -68,7 +79,18 @@ enum ApiEndpoint {
         case .createGift: return "gifts"
         case .updateGift(let id): return "gifts/\(id)"
         case .deleteGift(let id): return "gifts/\(id)"
-        case .generateGiftSuggestions: return "gifts/suggestions"
+        case .generateGiftSuggestions: return "gift-suggestions/generate"
+        case .getGiftSuggestions: return "gift-suggestions"
+        case .getBookmarkedSuggestions: return "gift-suggestions/bookmarked"
+        case .getPurchasedSuggestions: return "gift-suggestions/purchased"
+        case .getSuggestionsByEvent(let eventId): return "gift-suggestions/events/\(eventId)"
+        case .getSuggestionsByContact(let contactId): return "gift-suggestions/contacts/\(contactId)"
+        case .rateSuggestion: return "gift-suggestions/rate"
+        case .updateSuggestion: return "gift-suggestions/update"
+        case .bookmarkSuggestion(let suggestionId): return "gift-suggestions/\(suggestionId)/bookmark"
+        case .unbookmarkSuggestion(let suggestionId): return "gift-suggestions/\(suggestionId)/unbookmark"
+        case .markSuggestionAsPurchased(let suggestionId): return "gift-suggestions/\(suggestionId)/mark-purchased"
+        case .markSuggestionAsNotPurchased(let suggestionId): return "gift-suggestions/\(suggestionId)/mark-not-purchased"
         case .saveToWishlist: return "gifts/wishlist"
         case .removeFromWishlist(let id): return "gifts/wishlist/\(id)"
         }
@@ -76,12 +98,12 @@ enum ApiEndpoint {
 
     private var method: String {
         switch self {
-        case .authLogin, .authRegister, .authVerifyEmail, .authSendEmailVerification, .authLogout, .authForgotPassword, .authResetPassword, .appleAuth, .authSocialMobile, .createContact, .createEvent, .createGift, .generateGiftSuggestions, .saveToWishlist:
+        case .authLogin, .authRegister, .authVerifyEmail, .authSendEmailVerification, .authLogout, .authForgotPassword, .authResetPassword, .appleAuth, .authSocialMobile, .createContact, .createEvent, .createGift, .generateGiftSuggestions, .rateSuggestion, .saveToWishlist:
             return "POST"
-        case .listContacts, .listEvents, .listGifts:
+        case .listContacts, .listEvents, .listGifts, .getGiftSuggestions, .getBookmarkedSuggestions, .getPurchasedSuggestions, .getSuggestionsByEvent, .getSuggestionsByContact:
             return "GET"
-        case .updateContact, .updateEvent, .updateGift:
-            return "PUT"
+        case .updateContact, .updateEvent, .updateGift, .updateSuggestion, .bookmarkSuggestion, .unbookmarkSuggestion, .markSuggestionAsPurchased, .markSuggestionAsNotPurchased:
+            return "PATCH"
         case .deleteEvent, .deleteGift, .removeFromWishlist:
             return "DELETE"
         }
@@ -91,6 +113,16 @@ enum ApiEndpoint {
         switch self {
         case .listContacts(let ownerId), .listEvents(let ownerId):
             return [URLQueryItem(name: "ownerId", value: ownerId)]
+        case .getGiftSuggestions(let eventId, let contactId, let category, let isBookmarked, let isPurchased, let limit, let offset):
+            var items: [URLQueryItem] = []
+            if let eventId = eventId { items.append(URLQueryItem(name: "eventId", value: eventId)) }
+            if let contactId = contactId { items.append(URLQueryItem(name: "contactId", value: contactId)) }
+            if let category = category { items.append(URLQueryItem(name: "category", value: category)) }
+            if let isBookmarked = isBookmarked { items.append(URLQueryItem(name: "isBookmarked", value: String(isBookmarked))) }
+            if let isPurchased = isPurchased { items.append(URLQueryItem(name: "isPurchased", value: String(isPurchased))) }
+            if let limit = limit { items.append(URLQueryItem(name: "limit", value: String(limit))) }
+            if let offset = offset { items.append(URLQueryItem(name: "offset", value: String(offset))) }
+            return items.isEmpty ? nil : items
         default:
             return nil
         }

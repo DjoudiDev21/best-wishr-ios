@@ -25,7 +25,7 @@ final class EventsStore: ObservableObject {
             result = result.filter { event in
                 event.title.localizedCaseInsensitiveContains(searchText) ||
                 event.description?.localizedCaseInsensitiveContains(searchText) == true ||
-                event.eventType.rawValue.localizedCaseInsensitiveContains(searchText)
+                event.type.rawValue.localizedCaseInsensitiveContains(searchText)
             }
         }
         
@@ -67,13 +67,12 @@ final class EventsStore: ObservableObject {
     func loadEvents() async {
         isLoading = true
         error = nil
-        
         let result = await presenter.loadEvents(
             filter: nil, // We filter client-side for better UX
             sortBy: sortBy,
             searchQuery: nil // We search client-side for better UX
         )
-        
+
         switch result {
         case .success(let loadedEvents):
             events = loadedEvents

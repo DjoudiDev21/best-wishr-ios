@@ -17,13 +17,13 @@ struct AddEventForm: View {
                 Menu {
                     ForEach(EventType.allCases) { type in
                         Button(action: {
-                            eventData.eventType = type
+                            eventData.type = type
                         }) {
                             HStack {
                                 Image(systemName: type.icon)
                                 Text(type.rawValue)
                                 Spacer()
-                                if eventData.eventType == type {
+                                if eventData.type == type {
                                     Image(systemName: "checkmark")
                                 }
                             }
@@ -31,10 +31,10 @@ struct AddEventForm: View {
                     }
                 } label: {
                     HStack {
-                        Image(systemName: eventData.eventType.icon)
-                            .foregroundColor(eventData.eventType.color)
+                        Image(systemName: eventData.type.icon)
+                            .foregroundColor(eventData.type.color)
                         
-                        Text(eventData.eventType.rawValue)
+                        Text(eventData.type.rawValue)
                             .foregroundColor(.primary)
                         
                         Spacer()
@@ -143,6 +143,11 @@ struct AddEventForm: View {
                 subtitle: "Get notified before the event",
                 isOn: $eventData.hasReminders
             )
+            
+            // Reminder Selection (when enabled)
+            if eventData.hasReminders {
+                AddEventReminderSelection(eventData: $eventData)
+            }
         }
     }
 }
@@ -219,6 +224,77 @@ struct AddEventTextFieldStyle: TextFieldStyle {
                             .stroke(Color.gray.opacity(0.3), lineWidth: 1)
                     )
             )
+    }
+}
+
+struct AddEventReminderSelection: View {
+    @Binding var eventData: EventCreationData
+    
+    var body: some View {
+        AddEventFormField(title: "Reminder Settings", required: false) {
+            VStack(spacing: 8) {
+                // Display all reminder intervals with dynamic enable/disable
+                VStack(spacing: 8) {
+                    ForEach(ReminderInterval.allCases) { interval in
+                        let isAvailable = eventData.isReminderIntervalAvailable(interval)
+                        let isSelected = eventData.selectedReminderIntervals.contains(interval)
+                        
+                        HStack {
+                            Button(action: {
+                                if isAvailable {
+                                    if isSelected {
+                                        eventData.selectedReminderIntervals.remove(interval)
+                                    } else {
+                                        eventData.selectedReminderIntervals.insert(interval)
+                                    }
+                                }
+                            }) {
+                                HStack(spacing: 12) {
+                                    Image(systemName: isSelected ? "checkmark.square.fill" : "square")
+                                        .font(.system(size: 18))
+                                        .foregroundColor(isAvailable ? (isSelected ? Color(red: 0.65, green: 0.3, blue: 0.8) : .secondary) : .gray.opacity(0.3))
+                                    
+                                    Text("Remind me \(interval.rawValue.lowercased()) before")
+                                        .font(.system(size: 14, weight: .medium))
+                                        .foregroundColor(isAvailable ? .primary : .gray.opacity(0.5))
+                                    
+                                    Spacer()
+                                    
+                                    if !isAvailable {
+                                        Text("Too soon")
+                                            .font(.system(size: 12))
+                                            .foregroundColor(.gray.opacity(0.7))
+                                    }
+                                }
+                                .padding(.vertical, 8)
+                                .padding(.horizontal, 12)
+                            }
+                            .disabled(!isAvailable)
+                            .buttonStyle(PlainButtonStyle())
+                        }
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(isSelected && isAvailable ? Color(red: 0.65, green: 0.3, blue: 0.8).opacity(0.1) : Color.clear)
+                        )
+                    }
+                }
+                .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(.ultraThinMaterial)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                        )
+                )
+            }
+            .onAppear {
+                // Auto-select suggested reminders when this view appears
+                if eventData.selectedReminderIntervals.isEmpty {
+                    eventData.selectedReminderIntervals = eventData.suggestedReminderIntervals()
+                }
+            }
+        }
     }
 }
 

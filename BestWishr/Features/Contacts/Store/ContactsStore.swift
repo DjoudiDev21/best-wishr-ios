@@ -74,9 +74,6 @@ final class ContactsStore: ObservableObject {
     }
     
     func createContact(_ contactData: ContactCreationData) async -> Bool {
-        print("🏪 ContactsStore: Starting contact creation")
-        print("🏪 ContactsStore: Contact data - firstName: \(contactData.firstName), lastName: \(contactData.lastName), email: \(contactData.email)")
-        
         isLoading = true
         error = nil
         
@@ -84,14 +81,11 @@ final class ContactsStore: ObservableObject {
         
         switch result {
         case .success(let newContact):
-            print("✅ ContactsStore: Contact created successfully - ID: \(newContact.id)")
             contacts.append(newContact)
             contacts = contacts.sorted { $0.firstName < $1.firstName }
-            print("🏪 ContactsStore: Updated contacts list, new count: \(contacts.count)")
             isLoading = false
             return true
         case .failure(let createError):
-            print("❌ ContactsStore: Contact creation failed - \(createError)")
             error = createError
             errorHandler.handle(createError)
             isLoading = false
@@ -100,9 +94,6 @@ final class ContactsStore: ObservableObject {
     }
     
     func updateContact(_ contact: Contact) async -> Bool {
-        print("🏪 ContactsStore: Starting contact update")
-        print("🏪 ContactsStore: Contact - ID: \(contact.id), firstName: \(contact.firstName), lastName: \(contact.lastName ?? "")")
-        
         isLoading = true
         error = nil
         
@@ -110,17 +101,14 @@ final class ContactsStore: ObservableObject {
         
         switch result {
         case .success(let updatedContact):
-            print("✅ ContactsStore: Contact updated successfully - ID: \(updatedContact.id)")
             // Find and update the contact in the array
             if let index = contacts.firstIndex(where: { $0.id == updatedContact.id }) {
                 contacts[index] = updatedContact
                 contacts = contacts.sorted { $0.firstName < $1.firstName }
-                print("🏪 ContactsStore: Updated contacts list")
             }
             isLoading = false
             return true
         case .failure(let updateError):
-            print("❌ ContactsStore: Contact update failed - \(updateError)")
             error = updateError
             errorHandler.handle(updateError)
             isLoading = false

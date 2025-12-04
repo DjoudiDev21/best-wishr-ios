@@ -4,7 +4,7 @@ struct AllGiftSuggestionsView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var appStore: AppStore
     let contactId: String?
-    let eventType: EventType
+    let type: EventType
     
     private var contactName: String? {
         guard let contactId = contactId else { return nil }
@@ -38,6 +38,6 @@ struct AllGiftSuggestionsView: View {
 }
 
 #Preview {
-    AllGiftSuggestionsView(contactId: "1", eventType: .birthday)
+    AllGiftSuggestionsView(contactId: "1", type: .birthday)
         .environmentObject(AppStore())
 }

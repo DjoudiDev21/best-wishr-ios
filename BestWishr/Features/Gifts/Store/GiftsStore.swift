@@ -56,12 +56,8 @@ class GiftsStore: ObservableObject {
     
     // MARK: - Gift Suggestions
     
-    func generatePersonalizedSuggestions(for contactId: String, eventType: EventType) async {
-        await presenter.generatePersonalizedSuggestions(for: contactId, eventType: eventType)
-    }
-    
-    func generateGeneralSuggestions(for eventType: EventType, ageGroup: AgeGroup? = nil, gender: String? = nil) async {
-        await presenter.generateGeneralSuggestions(for: eventType, ageGroup: ageGroup, gender: gender)
+    func generateSuggestions(from eventData: EventCreationData, preferences: [String]? = nil) async {
+        await presenter.generateSuggestions(from: eventData, preferences: preferences)
     }
     
     // MARK: - Wishlist Management

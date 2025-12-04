@@ -92,7 +92,7 @@ struct UpcomingEventRow: View {
             VStack(spacing: 2) {
                 Text("\(Calendar.current.component(.day, from: event.date))")
                     .font(.system(size: 16, weight: .bold, design: .rounded))
-                    .foregroundColor(event.eventType.color)
+                    .foregroundColor(event.type.color)
                 
                 Text(event.shortFormattedDate.components(separatedBy: " ").dropFirst().joined(separator: " "))
                     .font(.system(size: 10, weight: .medium, design: .rounded))
@@ -103,12 +103,12 @@ struct UpcomingEventRow: View {
             // Event type icon
             ZStack {
                 Circle()
-                    .fill(event.eventType.color.opacity(0.2))
+                    .fill(event.type.color.opacity(0.2))
                     .frame(width: 32, height: 32)
                 
-                Image(systemName: event.eventType.icon)
+                Image(systemName: event.type.icon)
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(event.eventType.color)
+                    .foregroundColor(event.type.color)
             }
             
             // Event details
@@ -131,7 +131,7 @@ struct UpcomingEventRow: View {
                                 .lineLimit(1)
                         }
                     } else {
-                        Text(event.eventType.rawValue)
+                        Text(event.type.rawValue)
                             .font(.system(size: 11, weight: .medium, design: .rounded))
                             .foregroundColor(.secondary)
                     }
@@ -147,7 +147,7 @@ struct UpcomingEventRow: View {
                 if event.isToday {
                     Text("Today")
                         .font(.system(size: 10, weight: .bold, design: .rounded))
-                        .foregroundColor(event.eventType.color)
+                        .foregroundColor(event.type.color)
                 } else {
                     Text("\(event.daysUntilEvent)")
                         .font(.system(size: 12, weight: .bold, design: .rounded))
@@ -166,7 +166,7 @@ struct UpcomingEventRow: View {
                 .fill(.ultraThinMaterial)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .stroke(event.eventType.color.opacity(0.2), lineWidth: 1)
+                        .stroke(event.type.color.opacity(0.2), lineWidth: 1)
                 )
         )
     }

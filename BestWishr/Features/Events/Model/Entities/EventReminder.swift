@@ -76,7 +76,7 @@ enum EventFilter: String, CaseIterable, Identifiable {
 enum EventSortOption: String, CaseIterable, Identifiable {
     case date = "Date"
     case title = "Title"
-    case eventType = "Event Type"
+    case type = "Event Type"
     case dateCreated = "Date Created"
     
     var id: String { rawValue }
@@ -87,7 +87,7 @@ enum EventSortOption: String, CaseIterable, Identifiable {
             return "calendar"
         case .title:
             return "textformat.abc"
-        case .eventType:
+        case .type:
             return "tag"
         case .dateCreated:
             return "clock"
@@ -100,8 +100,8 @@ enum EventSortOption: String, CaseIterable, Identifiable {
             return events.sorted { $0.date < $1.date }
         case .title:
             return events.sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
-        case .eventType:
-            return events.sorted { $0.eventType.rawValue.localizedCaseInsensitiveCompare($1.eventType.rawValue) == .orderedAscending }
+        case .type:
+            return events.sorted { $0.type.rawValue.localizedCaseInsensitiveCompare($1.type.rawValue) == .orderedAscending }
         case .dateCreated:
             return events.sorted { $0.createdAt > $1.createdAt }
         }

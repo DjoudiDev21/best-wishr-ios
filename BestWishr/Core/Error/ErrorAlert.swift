@@ -98,16 +98,12 @@ struct ErrorHandler: ViewModifier {
     }
     
     private func handleErrorPresentation(_ presentation: ErrorPresentation) {
-        print("🔔 ErrorHandler: handleErrorPresentation called with mode: \(presentation.mode)")
-        
         switch presentation.mode {
         case .alert:
-            print("🔔 ErrorHandler: Showing alert for error: \(presentation.error)")
             // Already handled by the alert modifier above
             break
             
         case .banner:
-            print("🔔 ErrorHandler: Processing banner request")
             handleBannerPresentation(presentation)
             
         case .toast:
@@ -133,16 +129,12 @@ struct ErrorHandler: ViewModifier {
         guard let context = presentation.context,
               let email = context["email"] as? String,
               let bannerErrorType = context["errorType"] as? BannerErrorType else {
-            print("❌ ErrorHandler: Missing required context - email or errorType: \(presentation.context ?? [:])")
             return
         }
-        
-        print("🔔 ErrorHandler: Found email in context: \(email)")
-        
+                
         emailBannerType = createResendEmailType(from: bannerErrorType, email: email)
         
         withAnimation(.spring()) {
-            print("🔔 ErrorHandler: Showing banner for email: \(email)")
             showBanner = true
         }
     }

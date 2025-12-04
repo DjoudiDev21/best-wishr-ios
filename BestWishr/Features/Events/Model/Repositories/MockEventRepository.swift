@@ -58,7 +58,7 @@ final class MockEventRepository: EventRepositoryProtocol {
             let calendar = Calendar.current
             let existingEvents = events.filter { existingEvent in
                 existingEvent.contactId == contactId &&
-                existingEvent.eventType == event.eventType &&
+                existingEvent.type == event.type &&
                 calendar.isDate(existingEvent.date, inSameDayAs: event.date)
             }
             
@@ -71,7 +71,7 @@ final class MockEventRepository: EventRepositoryProtocol {
             id: event.id,
             title: event.title,
             description: event.description,
-            eventType: event.eventType,
+            type: event.type,
             contactId: event.contactId,
             date: event.date,
             recurrence: event.recurrence,
@@ -101,7 +101,7 @@ final class MockEventRepository: EventRepositoryProtocol {
             id: event.id,
             title: event.title,
             description: event.description,
-            eventType: event.eventType,
+            type: event.type,
             contactId: event.contactId,
             date: event.date,
             recurrence: event.recurrence,
@@ -134,13 +134,13 @@ final class MockEventRepository: EventRepositoryProtocol {
         return events.filter { event in
             event.title.lowercased().contains(lowercasedQuery) ||
             event.description?.lowercased().contains(lowercasedQuery) == true ||
-            event.eventType.rawValue.lowercased().contains(lowercasedQuery)
+            event.type.rawValue.lowercased().contains(lowercasedQuery)
         }.sorted { $0.date < $1.date }
     }
     
     func getEventsByType(_ eventType: EventType) async throws -> [Event] {
         try await Task.sleep(nanoseconds: 200_000_000) // 0.2 seconds
-        return events.filter { $0.eventType == eventType }
+        return events.filter { $0.type == eventType }
             .sorted { $0.date < $1.date }
     }
     
@@ -174,7 +174,7 @@ final class MockEventRepository: EventRepositoryProtocol {
                 id: "1",
                 title: "John's Birthday",
                 description: "John Doe's 29th birthday celebration",
-                eventType: .birthday,
+                type: .birthday,
                 contactId: "1", // Links to John Doe contact
                 date: calendar.date(byAdding: .day, value: 5, to: now) ?? now,
                 recurrence: RecurrenceRule(frequency: .yearly),
@@ -188,7 +188,7 @@ final class MockEventRepository: EventRepositoryProtocol {
                 id: "2",
                 title: "Jane's Birthday",
                 description: "Jane Smith's birthday party",
-                eventType: .birthday,
+                type: .birthday,
                 contactId: "2", // Links to Jane Smith contact
                 date: calendar.date(byAdding: .day, value: 12, to: now) ?? now,
                 recurrence: RecurrenceRule(frequency: .yearly),
@@ -198,27 +198,12 @@ final class MockEventRepository: EventRepositoryProtocol {
                 ]
             ),
             
-            // Anniversary
-            Event(
-                id: "3",
-                title: "Wedding Anniversary",
-                description: "Mike and Sarah's 5th wedding anniversary",
-                eventType: .anniversary,
-                contactId: nil,
-                date: calendar.date(byAdding: .day, value: 25, to: now) ?? now,
-                recurrence: RecurrenceRule(frequency: .yearly),
-                reminders: [
-                    EventReminder(interval: .oneWeek),
-                    EventReminder(interval: .threeDays)
-                ]
-            ),
-            
             // Past events
             Event(
                 id: "4",
                 title: "David's Birthday",
                 description: "David Brown's birthday celebration",
-                eventType: .birthday,
+                type: .birthday,
                 contactId: "5", // Links to David Brown contact
                 date: calendar.date(byAdding: .day, value: -15, to: now) ?? now,
                 recurrence: RecurrenceRule(frequency: .yearly),
@@ -226,41 +211,12 @@ final class MockEventRepository: EventRepositoryProtocol {
                 isCompleted: true
             ),
             
-            // Meeting
-            Event(
-                id: "5",
-                title: "Project Kickoff Meeting",
-                description: "Quarterly planning meeting",
-                eventType: .meeting,
-                contactId: nil,
-                date: calendar.date(byAdding: .day, value: 2, to: now) ?? now,
-                reminders: [
-                    EventReminder(interval: .oneDay),
-                    EventReminder(interval: .oneHour)
-                ]
-            ),
-            
-            // Holiday
-            Event(
-                id: "6",
-                title: "Christmas",
-                description: "Christmas celebration with family",
-                eventType: .holiday,
-                contactId: nil,
-                date: calendar.date(byAdding: .month, value: 2, to: now) ?? now,
-                recurrence: RecurrenceRule(frequency: .yearly),
-                reminders: [
-                    EventReminder(interval: .oneMonth),
-                    EventReminder(interval: .oneWeek)
-                ]
-            ),
-            
             // Today's event
             Event(
                 id: "7",
                 title: "Emily's Birthday",
                 description: "Emily Davis's special day",
-                eventType: .birthday,
+                type: .birthday,
                 contactId: "6", // Links to Emily Davis contact
                 date: now,
                 recurrence: RecurrenceRule(frequency: .yearly),

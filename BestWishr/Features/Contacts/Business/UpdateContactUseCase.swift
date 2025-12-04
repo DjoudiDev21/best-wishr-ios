@@ -8,27 +8,17 @@ struct UpdateContactUseCase {
     }
     
     func execute(_ contact: Contact) async -> Result<Contact, Error> {
-        print("🔄 UpdateContactUseCase: Starting execution")
-        print("🔄 UpdateContactUseCase: Contact - ID: \(contact.id), firstName: \(contact.firstName), lastName: \(contact.lastName ?? "")")
-        
         do {
             // Validate input
-            print("🔄 UpdateContactUseCase: Validating contact data")
             let validation = validateContact(contact)
             if let validationError = validation {
-                print("❌ UpdateContactUseCase: Validation failed - \(validationError)")
                 return .failure(validationError)
             }
-            print("✅ UpdateContactUseCase: Validation passed")
             
             // Update contact in repository
-            print("🔄 UpdateContactUseCase: Calling repository.updateContact")
             let updatedContact = try await repository.updateContact(contact)
-            print("✅ UpdateContactUseCase: Repository call succeeded - Updated contact ID: \(updatedContact.id)")
-            
             return .success(updatedContact)
         } catch {
-            print("❌ UpdateContactUseCase: Repository call failed - \(error)")
             return .failure(error)
         }
     }

@@ -3,9 +3,9 @@ import SwiftUI
 struct GiftSuggestionsView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var appStore: AppStore
+    @State private var viewModel: GiftSuggestionsViewModel?
     let contactId: String?
     let eventType: EventType
-    @State private var showingAllSuggestions = false
     
     private var contactName: String? {
         guard let contactId = contactId else { return nil }
@@ -15,20 +15,22 @@ struct GiftSuggestionsView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
-                GiftSuggestionsHeader(
-                    contactName: contactName,
-                    eventType: eventType,
-                    hasContent: !appStore.giftsStore.suggestions.isEmpty
-                ) {
-                    showingAllSuggestions = true
-                }
-                
-                GiftSuggestionsContent(
-                    isLoading: appStore.giftsStore.isLoadingSuggestions,
-                    suggestions: appStore.giftsStore.suggestions
-                ) {
-                    Task {
-                        await generateSuggestions()
+                if let viewModel = viewModel {
+                    GiftSuggestionsHeader(
+                        contactName: contactName,
+                        eventType: eventType,
+                        hasContent: !viewModel.suggestions.isEmpty
+                    ) {
+                        viewModel.showingAllSuggestions = true
+                    }
+                    
+                    GiftSuggestionsContent(
+                        isLoading: viewModel.isLoading,
+                        suggestions: viewModel.suggestions
+                    ) {
+                        Task {
+                            await viewModel.generateSuggestions(contactId: contactId, eventType: eventType)
+                        }
                     }
                 }
                 
@@ -50,19 +52,14 @@ struct GiftSuggestionsView: View {
         }
         .onAppear {
             Task {
-                await generateSuggestions()
+                await viewModel?.generateSuggestions(contactId: contactId, eventType: eventType)
             }
         }
-        .sheet(isPresented: $showingAllSuggestions) {
-            AllGiftSuggestionsView(contactId: contactId, eventType: eventType)
-        }
-    }
-    
-    private func generateSuggestions() async {
-        if let contactId = contactId {
-            await appStore.giftsStore.generatePersonalizedSuggestions(for: contactId, eventType: eventType)
-        } else {
-            await appStore.giftsStore.generateGeneralSuggestions(for: eventType)
+        .sheet(isPresented: Binding(
+            get: { viewModel?.showingAllSuggestions ?? false },
+            set: { viewModel?.showingAllSuggestions = $0 }
+        )) {
+            AllGiftSuggestionsView(contactId: contactId, type: eventType)
         }
     }
 }

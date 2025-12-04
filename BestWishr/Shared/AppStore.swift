@@ -71,14 +71,12 @@ final class AppStore: ObservableObject {
         let giftsRepository = Self.createGiftsRepository { 
             authStore.tokens?.accessToken
         }
-        let generatePersonalizedSuggestionsUseCase = GeneratePersonalizedGiftSuggestionsUseCase(repository: giftsRepository)
-        let generateGeneralSuggestionsUseCase = GenerateGeneralGiftSuggestionsUseCase(repository: giftsRepository)
+        let generateGiftSuggestionsUseCase = GenerateGiftSuggestionsUseCase(repository: giftsRepository)
         let saveGiftToWishlistUseCase = SaveGiftToWishlistUseCase(repository: giftsRepository)
         let getSavedGiftsUseCase = GetSavedGiftsUseCase(repository: giftsRepository)
         let markGiftAsPurchasedUseCase = MarkGiftAsPurchasedUseCase(repository: giftsRepository)
         let giftsPresenter = GiftsPresenter(
-            generatePersonalizedSuggestionsUseCase: generatePersonalizedSuggestionsUseCase,
-            generateGeneralSuggestionsUseCase: generateGeneralSuggestionsUseCase,
+            generateGiftSuggestionsUseCase: generateGiftSuggestionsUseCase,
             saveGiftToWishlistUseCase: saveGiftToWishlistUseCase,
             getSavedGiftsUseCase: getSavedGiftsUseCase,
             markGiftAsPurchasedUseCase: markGiftAsPurchasedUseCase
@@ -123,7 +121,7 @@ final class AppStore: ObservableObject {
     
     private static func createGiftsRepository(
         tokenProvider: @escaping () -> String?
-    ) -> GiftRepository {
+    ) -> GiftRepositoryProtocol {
         let httpClient = HttpClient(baseURL: baseURL, tokenProvider: tokenProvider)
         return HttpGiftRepository(httpClient: httpClient)
     }

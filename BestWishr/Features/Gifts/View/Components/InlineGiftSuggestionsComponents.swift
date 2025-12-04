@@ -2,7 +2,7 @@ import SwiftUI
 
 struct InlineGiftSuggestionsHeader: View {
     let contactName: String?
-    let eventType: EventType
+    let type: EventType
     let hasContent: Bool
     let isLoading: Bool
     let onRefresh: () -> Void
@@ -15,11 +15,11 @@ struct InlineGiftSuggestionsHeader: View {
                     .foregroundColor(Color(red: 0.45, green: 0.3, blue: 0.6))
                 
                 if let contactName = contactName {
-                    Text("For \(contactName)'s \(eventType.rawValue)")
+                    Text("For \(contactName)'s \(type.rawValue)")
                         .font(.system(size: 14, weight: .medium, design: .rounded))
                         .foregroundColor(.secondary)
                 } else {
-                    Text("For \(eventType.rawValue)")
+                    Text("For \(type.rawValue)")
                         .font(.system(size: 14, weight: .medium, design: .rounded))
                         .foregroundColor(.secondary)
                 }
@@ -240,7 +240,7 @@ struct SkeletonGiftCard: View {
     VStack(spacing: 20) {
         InlineGiftSuggestionsHeader(
             contactName: "John",
-            eventType: .birthday,
+            type: .birthday,
             hasContent: true,
             isLoading: false
         ) { }

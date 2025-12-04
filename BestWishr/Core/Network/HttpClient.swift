@@ -5,6 +5,8 @@ protocol HttpClientProtocol {
     func post<T: Decodable, U: Encodable>(_ endpoint: ApiEndpoint, body: U) async throws -> T
     func postVoid<U: Encodable>(_ endpoint: ApiEndpoint, body: U) async throws
     func put<T: Decodable, U: Encodable>(_ endpoint: ApiEndpoint, body: U) async throws -> T
+    func patch<T: Decodable, U: Encodable>(_ endpoint: ApiEndpoint, body: U) async throws -> T
+    func patchVoid<U: Encodable>(_ endpoint: ApiEndpoint, body: U) async throws
     func delete(_ endpoint: ApiEndpoint) async throws
 }
 
@@ -27,6 +29,7 @@ final class HttpClient: HttpClientProtocol {
         addAuthHeaderIfNeeded(to: &request, endpoint: endpoint)
         
         print("🌐 GET Request: \(request.url?.absoluteString ?? "unknown URL")")
+        print("GET ENDPOINT: \(endpoint)")
         print("📤 Headers: \(request.allHTTPHeaderFields ?? [:])")
         
         do {
@@ -39,7 +42,6 @@ final class HttpClient: HttpClientProtocol {
                     print("📥 GET Response body: \(responseString)")
                 }
             }
-            
             let result: T = try decodeResponse(data: data, response: response)
             return result
         } catch {
@@ -112,11 +114,85 @@ final class HttpClient: HttpClientProtocol {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         addAuthHeaderIfNeeded(to: &request, endpoint: endpoint)
         
+        print("🌐 PUT Request: \(request.url?.absoluteString ?? "unknown URL")")
+        print("📤 Headers: \(request.allHTTPHeaderFields ?? [:])")
+        if let bodyData = request.httpBody, let bodyString = String(data: bodyData, encoding: .utf8) {
+            print("📤 PUT Body: \(bodyString)")
+        }
+        
         do {
             let (data, response) = try await session.data(for: request)
+            
+            // Log response details
+            if let httpResponse = response as? HTTPURLResponse {
+                print("📥 PUT Response received: \(data.count) bytes, status: \(httpResponse.statusCode)")
+                if let responseString = String(data: data, encoding: .utf8) {
+                    print("📥 PUT Response body: \(responseString)")
+                }
+            }
+            
             let result: T = try decodeResponse(data: data, response: response)
             return result
         } catch {
+            print("❌ PUT Request failed: \(error)")
+            throw error
+        }
+    }
+    
+    func patch<T: Decodable, U: Encodable>(_ endpoint: ApiEndpoint, body: U) async throws -> T {
+        var request = try endpoint.makeRequest(baseURL: baseURL)
+        request.httpMethod = "PATCH"
+        request.httpBody = try JSONEncoder().encode(body)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        addAuthHeaderIfNeeded(to: &request, endpoint: endpoint)
+        
+        print("🌐 PATCH Request: \(request.url?.absoluteString ?? "unknown URL")")
+        print("📤 Headers: \(request.allHTTPHeaderFields ?? [:])")
+        if let bodyData = request.httpBody, let bodyString = String(data: bodyData, encoding: .utf8) {
+            print("📤 PATCH Body: \(bodyString)")
+        }
+        
+        do {
+            let (data, response) = try await session.data(for: request)
+            
+            // Log response details
+            if let httpResponse = response as? HTTPURLResponse {
+                print("📥 PATCH Response received: \(data.count) bytes, status: \(httpResponse.statusCode)")
+                if let responseString = String(data: data, encoding: .utf8) {
+                    print("📥 PATCH Response body: \(responseString)")
+                }
+            }
+            
+            let result: T = try decodeResponse(data: data, response: response)
+            return result
+        } catch {
+            print("❌ PATCH Request failed: \(error)")
+            throw error
+        }
+    }
+    
+    func patchVoid<U: Encodable>(_ endpoint: ApiEndpoint, body: U) async throws {
+        print("🌐 HttpClient.patchVoid: Starting request to endpoint: \(endpoint)")
+        var request = try endpoint.makeRequest(baseURL: baseURL)
+        print("🌐 HttpClient.patchVoid: Request URL: \(request.url?.absoluteString ?? "nil")")
+        request.httpMethod = "PATCH"
+        request.httpBody = try JSONEncoder().encode(body)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        addAuthHeaderIfNeeded(to: &request, endpoint: endpoint)
+        print("🌐 HttpClient.patchVoid: Set headers and body")
+        
+        if let bodyData = request.httpBody, let bodyString = String(data: bodyData, encoding: .utf8) {
+            print("📤 Body: \(bodyString)")
+        }
+        
+        print("🌐 HttpClient.patchVoid: Making URLSession.data request")
+        do {
+            let (data, response) = try await session.data(for: request)
+            print("🌐 HttpClient.patchVoid: Received response")
+            try validateResponse(response: response, data: data)
+            print("✅ HttpClient.patchVoid: Request completed successfully")
+        } catch {
+            print("❌ HttpClient.patchVoid: Request failed with error: \(error)")
             throw error
         }
     }

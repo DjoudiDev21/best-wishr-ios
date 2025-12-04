@@ -3,8 +3,7 @@ import Combine
 
 @MainActor
 class GiftsPresenter: ObservableObject {
-    private let generatePersonalizedSuggestionsUseCase: GeneratePersonalizedGiftSuggestionsUseCase
-    private let generateGeneralSuggestionsUseCase: GenerateGeneralGiftSuggestionsUseCase
+    private let generateGiftSuggestionsUseCase: GenerateGiftSuggestionsUseCase
     private let saveGiftToWishlistUseCase: SaveGiftToWishlistUseCase
     private let getSavedGiftsUseCase: GetSavedGiftsUseCase
     private let markGiftAsPurchasedUseCase: MarkGiftAsPurchasedUseCase
@@ -17,14 +16,12 @@ class GiftsPresenter: ObservableObject {
     @Published var error: String? = nil
     
     init(
-        generatePersonalizedSuggestionsUseCase: GeneratePersonalizedGiftSuggestionsUseCase,
-        generateGeneralSuggestionsUseCase: GenerateGeneralGiftSuggestionsUseCase,
+        generateGiftSuggestionsUseCase: GenerateGiftSuggestionsUseCase,
         saveGiftToWishlistUseCase: SaveGiftToWishlistUseCase,
         getSavedGiftsUseCase: GetSavedGiftsUseCase,
         markGiftAsPurchasedUseCase: MarkGiftAsPurchasedUseCase
     ) {
-        self.generatePersonalizedSuggestionsUseCase = generatePersonalizedSuggestionsUseCase
-        self.generateGeneralSuggestionsUseCase = generateGeneralSuggestionsUseCase
+        self.generateGiftSuggestionsUseCase = generateGiftSuggestionsUseCase
         self.saveGiftToWishlistUseCase = saveGiftToWishlistUseCase
         self.getSavedGiftsUseCase = getSavedGiftsUseCase
         self.markGiftAsPurchasedUseCase = markGiftAsPurchasedUseCase
@@ -32,27 +29,12 @@ class GiftsPresenter: ObservableObject {
     
     // MARK: - Gift Suggestions
     
-    func generatePersonalizedSuggestions(for contactId: String, eventType: EventType) async {
+    func generateSuggestions(from eventData: EventCreationData, preferences: [String]? = nil) async {
         isLoadingSuggestions = true
         error = nil
         
         do {
-            let newSuggestions = try await generatePersonalizedSuggestionsUseCase.execute(for: contactId, eventType: eventType)
-            suggestions = newSuggestions
-        } catch {
-            self.error = "Failed to generate personalized suggestions: \(error.localizedDescription)"
-        }
-        
-        isLoadingSuggestions = false
-    }
-    
-    func generateGeneralSuggestions(for eventType: EventType, ageGroup: AgeGroup? = nil, gender: String? = nil) async {
-        isLoadingSuggestions = true
-        error = nil
-        
-        do {
-            let newSuggestions = try await generateGeneralSuggestionsUseCase.execute(for: eventType, ageGroup: ageGroup, gender: gender)
-            suggestions = newSuggestions
+            suggestions = try await generateGiftSuggestionsUseCase.execute(from: eventData, preferences: preferences)
         } catch {
             self.error = "Failed to generate suggestions: \(error.localizedDescription)"
         }

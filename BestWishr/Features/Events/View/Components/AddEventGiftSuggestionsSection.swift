@@ -14,215 +14,40 @@ struct AddEventGiftSuggestionsSection: View {
     }
     
     private var shouldRegenerateContent: Bool {
-        lastEventType != eventData.eventType || lastContactId != eventData.contactId
+        lastEventType != eventData.type || lastContactId != eventData.contactId
     }
     
     var body: some View {
         VStack(spacing: 16) {
-            // Gift Suggestions Toggle Section
-            VStack(spacing: 16) {
-                // Section Header with Toggle
-                HStack(spacing: 12) {
-                    Image(systemName: "gift")
-                        .font(.system(size: 20, weight: .medium))
-                        .foregroundColor(Color(red: 1.0, green: 0.6, blue: 0.0))
-                    
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Gift Suggestions")
-                            .font(.system(size: 18, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(red: 0.45, green: 0.3, blue: 0.6))
-                        
-                        Text("Get AI-powered gift ideas")
-                            .font(.system(size: 14, weight: .medium, design: .rounded))
-                            .foregroundColor(.secondary)
-                    }
-                    
-                    Spacer()
-                    
-                    Toggle("", isOn: $eventData.giftSuggestionsEnabled)
-                        .toggleStyle(SwitchToggleStyle(tint: Color(red: 1.0, green: 0.6, blue: 0.0)))
-                }
-                
-                // Generate Button (only when enabled but not generated yet)
-                if eventData.giftSuggestionsEnabled && !hasGeneratedOnce && !appStore.giftsStore.isLoadingSuggestions {
-                    VStack(spacing: 12) {
-                        Button(action: {
-                            Task {
-                                await generateSuggestions()
-                            }
-                        }) {
-                            HStack(spacing: 8) {
-                                Image(systemName: "wand.and.stars")
-                                    .font(.system(size: 14, weight: .medium))
-                                
-                                Text("Generate Gift Ideas")
-                                    .font(.system(size: 16, weight: .semibold, design: .rounded))
-                            }
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .background(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(
-                                        LinearGradient(
-                                            colors: [Color(red: 1.0, green: 0.6, blue: 0.0), Color(red: 1.0, green: 0.5, blue: 0.2)],
-                                            startPoint: .topLeading,
-                                            endPoint: .bottomTrailing
-                                        )
-                                    )
-                                    .shadow(color: Color(red: 1.0, green: 0.6, blue: 0.0).opacity(0.3), radius: 8, x: 0, y: 4)
-                            )
-                        }
-                        
-                        // Helpful info based on contact selection
-                        if eventData.contactId == nil {
-                            HStack(spacing: 6) {
-                                Image(systemName: "info.circle")
-                                    .font(.system(size: 12, weight: .medium))
-                                Text("Add a contact above for personalized suggestions")
-                                    .font(.system(size: 12, weight: .medium, design: .rounded))
-                            }
-                            .foregroundColor(Color(red: 1.0, green: 0.6, blue: 0.0))
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                            .background(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(Color(red: 1.0, green: 0.6, blue: 0.0).opacity(0.1))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .stroke(Color(red: 1.0, green: 0.6, blue: 0.0).opacity(0.2), lineWidth: 1)
-                                    )
-                            )
-                        } else {
-                            HStack(spacing: 6) {
-                                Image(systemName: "person.circle.fill")
-                                    .font(.system(size: 12, weight: .medium))
-                                Text("Will generate personalized suggestions for \(contactName ?? "selected contact")")
-                                    .font(.system(size: 12, weight: .medium, design: .rounded))
-                            }
-                            .foregroundColor(Color(red: 0.2, green: 0.6, blue: 0.9))
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                            .background(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(Color(red: 0.2, green: 0.6, blue: 0.9).opacity(0.1))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .stroke(Color(red: 0.2, green: 0.6, blue: 0.9).opacity(0.2), lineWidth: 1)
-                                    )
-                            )
-                        }
-                    }
-                }
-                
-                // Inline Gift Suggestions (only when enabled)
-                if eventData.giftSuggestionsEnabled {
-                    if appStore.giftsStore.isLoadingSuggestions {
-                        InlineGiftSuggestionsLoadingState()
-                    } else if !appStore.giftsStore.suggestions.isEmpty {
-                        VStack(spacing: 12) {
-                            // Results Header with Regenerate Option
-                            HStack {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    if let contactName = contactName {
-                                        Text("For \(contactName)'s \(eventData.eventType.rawValue)")
-                                            .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                            .foregroundColor(.primary)
-                                    } else {
-                                        Text("For \(eventData.eventType.rawValue)")
-                                            .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                            .foregroundColor(.primary)
-                                    }
-                                    
-                                    Text("\(appStore.giftsStore.suggestions.count) suggestions")
-                                        .font(.system(size: 12, design: .rounded))
-                                        .foregroundColor(.secondary)
-                                }
-                                
-                                Spacer()
-                                
-                                // Regenerate button when context has changed
-                                if shouldRegenerateContent {
-                                    Button(action: {
-                                        Task {
-                                            await generateSuggestions()
-                                        }
-                                    }) {
-                                        HStack(spacing: 4) {
-                                            Image(systemName: "arrow.clockwise")
-                                                .font(.system(size: 12, weight: .medium))
-                                            Text("Update")
-                                                .font(.system(size: 12, weight: .medium, design: .rounded))
-                                        }
-                                        .foregroundColor(.white)
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 6)
-                                        .background(
-                                            RoundedRectangle(cornerRadius: 16)
-                                                .fill(Color(red: 1.0, green: 0.6, blue: 0.0))
-                                                .shadow(color: Color(red: 1.0, green: 0.6, blue: 0.0).opacity(0.3), radius: 4, x: 0, y: 2)
-                                        )
-                                    }
-                                } else {
-                                    // Subtle refresh option when no context change
-                                    Button(action: {
-                                        Task {
-                                            await generateSuggestions()
-                                        }
-                                    }) {
-                                        Image(systemName: "arrow.clockwise")
-                                            .font(.system(size: 12, weight: .medium))
-                                            .foregroundColor(.secondary)
-                                    }
-                                }
-                            }
-                            
-                            // Context change notification
-                            if shouldRegenerateContent {
-                                HStack(spacing: 6) {
-                                    Image(systemName: "exclamationmark.triangle.fill")
-                                        .font(.system(size: 10, weight: .medium))
-                                    Text("Tap 'Update' to generate new suggestions for this context")
-                                        .font(.system(size: 11, weight: .medium, design: .rounded))
-                                }
-                                .foregroundColor(.orange)
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 6)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 6)
-                                        .fill(Color.orange.opacity(0.1))
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 6)
-                                                .stroke(Color.orange.opacity(0.2), lineWidth: 1)
-                                        )
-                                )
-                            }
-                            
-                            // Gift Grid
-                            InlineGiftSuggestionsGrid(suggestions: appStore.giftsStore.suggestions)
-                        }
-                    } else if hasGeneratedOnce {
-                        InlineGiftSuggestionsEmptyState {
-                            Task {
-                                await generateSuggestions()
-                            }
-                        }
-                    }
-                }
-            }
+            
+            GiftSuggestionsHeaderToggle(
+                eventData: $eventData
+            )
+            
+            // Generate button + info
+            GenerateButtonSection(
+                eventData: eventData,
+                hasGeneratedOnce: hasGeneratedOnce,
+                contactName: contactName,
+                isLoading: appStore.giftsStore.isLoadingSuggestions,
+                generate: generateSuggestions
+            )
+            
+            // Inline suggestions
+            SuggestionsSection(
+                eventData: eventData,
+                contactName: contactName,
+                shouldRegenerateContent: shouldRegenerateContent,
+                hasGeneratedOnce: hasGeneratedOnce,
+                suggestions: appStore.giftsStore.suggestions,
+                isLoading: appStore.giftsStore.isLoadingSuggestions,
+                regenerate: generateSuggestions
+            )
         }
         .padding(16)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color(red: 1.0, green: 0.6, blue: 0.0).opacity(0.05))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .stroke(Color(red: 1.0, green: 0.6, blue: 0.0).opacity(0.2), lineWidth: 1)
-                )
-        )
+        .giftBoxBackground()
         .onChange(of: eventData.giftSuggestionsEnabled) { _, enabled in
             if !enabled {
-                // Clear suggestions when disabled
                 appStore.giftsStore.clearSuggestions()
                 hasGeneratedOnce = false
                 lastEventType = nil
@@ -231,71 +56,217 @@ struct AddEventGiftSuggestionsSection: View {
         }
     }
     
-    private func handleContentChange() {
-        if shouldRegenerateContent {
-            // Clear existing suggestions immediately
-            appStore.giftsStore.clearSuggestions()
-            hasGeneratedOnce = false
+    private func generateSuggestions() async {
+        lastEventType = eventData.type
+        lastContactId = eventData.contactId
+        hasGeneratedOnce = true
+        
+        // Use the new form-based approach that doesn't require an existing event
+        await appStore.giftsStore.generateSuggestions(from: eventData)
+    }
+}
+
+struct GiftSuggestionsHeaderToggle: View {
+    @Binding var eventData: EventCreationData
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "gift")
+                .font(.system(size: 20, weight: .medium))
+                .foregroundColor(Color(red: 1.0, green: 0.6, blue: 0.0))
             
-            // Generate new suggestions
-            Task {
-                await generateSuggestions()
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Gift Suggestions")
+                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                    .foregroundColor(Color(red: 0.45, green: 0.3, blue: 0.6))
+                
+                Text("Get AI-powered gift ideas")
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .foregroundColor(.secondary)
+            }
+            
+            Spacer()
+            
+            Toggle("", isOn: $eventData.giftSuggestionsEnabled)
+                .toggleStyle(SwitchToggleStyle(tint: Color(red: 1.0, green: 0.6, blue: 0.0)))
+        }
+    }
+}
+
+struct GenerateButtonSection: View {
+    let eventData: EventCreationData
+    let hasGeneratedOnce: Bool
+    let contactName: String?
+    let isLoading: Bool
+    let generate: () async -> Void
+    
+    var body: some View {
+        if eventData.giftSuggestionsEnabled && !hasGeneratedOnce && !isLoading {
+            VStack(spacing: 12) {
+                
+                Button(action: {
+                    Task { await generate() }
+                }) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "wand.and.stars")
+                        Text("Generate Gift Ideas")
+                    }
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(
+                                LinearGradient(
+                                    colors: eventData.canGenerateGiftSuggestions ? 
+                                        [Color(red: 1.0, green: 0.6, blue: 0.0), Color(red: 1.0, green: 0.5, blue: 0.2)] :
+                                        [Color.gray.opacity(0.6), Color.gray.opacity(0.4)],
+                                    startPoint: .topLeading, endPoint: .bottomTrailing
+                                )
+                            )
+                    )
+                }
+                .disabled(!eventData.canGenerateGiftSuggestions)
+                
+                if !eventData.canGenerateGiftSuggestions {
+                    InfoBubble(icon: "exclamationmark.triangle",
+                               text: "Please add an event title to generate gift suggestions",
+                               color: Color.red)
+                } else if eventData.contactId == nil {
+                    InfoBubble(icon: "info.circle",
+                               text: "Add a contact above for personalized suggestions",
+                               color: Color.orange)
+                } else {
+                    InfoBubble(icon: "person.circle.fill",
+                               text: "Will generate personalized suggestions for \(contactName ?? "selected contact")",
+                               color: Color.blue)
+                }
+            }
+        }
+    }
+}
+
+struct SuggestionsSection: View {
+    let eventData: EventCreationData
+    let contactName: String?
+    let shouldRegenerateContent: Bool
+    let hasGeneratedOnce: Bool
+    let suggestions: [Gift]
+    let isLoading: Bool
+    let regenerate: () async -> Void
+    
+    var body: some View {
+        if !eventData.giftSuggestionsEnabled { return AnyView(EmptyView()) }
+        
+        if isLoading {
+            return AnyView(InlineGiftSuggestionsLoadingState())
+        }
+        
+        if !suggestions.isEmpty {
+            return AnyView(
+                VStack(spacing: 12) {
+                    header
+                    if shouldRegenerateContent { refreshWarning }
+                    InlineGiftSuggestionsGrid(suggestions: suggestions)
+                }
+            )
+        }
+        
+        if hasGeneratedOnce {
+            return AnyView(
+                InlineGiftSuggestionsEmptyState {
+                    Task { await regenerate() }
+                }
+            )
+        }
+        
+        return AnyView(EmptyView())
+    }
+    
+    private var header: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                if let name = contactName {
+                    Text("For \(name)'s \(eventData.type.rawValue)")
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                } else {
+                    Text("For \(eventData.type.rawValue)")
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                }
+                
+                Text("\(suggestions.count) suggestions")
+                    .font(.system(size: 12, design: .rounded))
+                    .foregroundColor(.secondary)
+            }
+            
+            Spacer()
+            
+            Button(action: { Task { await regenerate() } }) {
+                if shouldRegenerateContent {
+                    HStack(spacing: 4) {
+                        Image(systemName: "arrow.clockwise")
+                        Text("Update")
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color.orange)
+                    )
+                } else {
+                    Image(systemName: "arrow.clockwise")
+                        .foregroundColor(.secondary)
+                }
             }
         }
     }
     
-    private func generateSuggestions() async {
-        lastEventType = eventData.eventType
-        lastContactId = eventData.contactId
-        hasGeneratedOnce = true
-        
-        if let contactId = eventData.contactId {
-            await appStore.giftsStore.generatePersonalizedSuggestions(for: contactId, eventType: eventData.eventType)
-        } else {
-            await appStore.giftsStore.generateGeneralSuggestions(for: eventData.eventType)
-        }
+    private var refreshWarning: some View {
+        InfoBubble(
+            icon: "exclamationmark.triangle.fill",
+            text: "Tap 'Update' to generate new suggestions for this context",
+            color: .orange,
+            small: true
+        )
     }
 }
 
-struct GiftSuggestionBenefit: View {
+struct InfoBubble: View {
     let icon: String
     let text: String
+    let color: Color
+    var small: Bool = false
     
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 6) {
             Image(systemName: icon)
-                .font(.system(size: 12, weight: .medium))
-                .foregroundColor(Color(red: 1.0, green: 0.6, blue: 0.0))
-                .frame(width: 16)
-            
+                .font(.system(size: small ? 10 : 12))
             Text(text)
-                .font(.system(size: 13, weight: .medium, design: .rounded))
-                .foregroundColor(.secondary)
-            
-            Spacer()
+                .font(.system(size: small ? 11 : 12, weight: .medium, design: .rounded))
         }
+        .foregroundColor(color)
+        .padding(.horizontal, 12)
+        .padding(.vertical, small ? 6 : 8)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(color.opacity(0.1))
+                .overlay(RoundedRectangle(cornerRadius: 8).stroke(color.opacity(0.2), lineWidth: 1))
+        )
     }
 }
 
-#Preview {
-    VStack {
-        AddEventGiftSuggestionsSection(
-            eventData: .constant(EventCreationData(
-                title: "John's Birthday",
-                eventType: .birthday,
-                contactId: "1"
-            )),
-            showingGiftSuggestions: .constant(false)
-        )
-        
-        AddEventGiftSuggestionsSection(
-            eventData: .constant(EventCreationData(
-                title: "Anniversary Dinner",
-                eventType: .anniversary
-            )),
-            showingGiftSuggestions: .constant(false)
+extension View {
+    func giftBoxBackground() -> some View {
+        self.background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.orange.opacity(0.05))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(Color.orange.opacity(0.2), lineWidth: 1)
+                )
         )
     }
-    .padding()
-    .environmentObject(AppStore())
 }
+

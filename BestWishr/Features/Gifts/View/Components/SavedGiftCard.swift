@@ -18,7 +18,7 @@ struct SavedGiftCard: View {
                 isPurchased: gift.isPurchased
             ) {
                 Task {
-                    await appStore.giftsStore.togglePurchased(giftId: gift.id)
+                    print("saved gift action")
                 }
             } onExternalLink: {
                 // Future: Open external link

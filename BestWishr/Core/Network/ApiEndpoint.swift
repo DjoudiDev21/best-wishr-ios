@@ -24,16 +24,12 @@ enum ApiEndpoint {
     case generateGiftSuggestions
     case getGiftSuggestions(eventId: String?, contactId: String?, category: String?, isBookmarked: Bool?, isPurchased: Bool?, limit: Int?, offset: Int?)
     case getBookmarkedSuggestions
-    case getPurchasedSuggestions
     case getSuggestionsByEvent(String)
     case getSuggestionsByContact(String)
     case rateSuggestion
     case updateSuggestion
     case bookmarkSuggestion(String)
     case unbookmarkSuggestion(String)
-    case markSuggestionAsPurchased(String)
-    case markSuggestionAsNotPurchased(String)
-    case saveToWishlist
     case removeFromWishlist(String)
     
     var requiresAuth: Bool {
@@ -82,27 +78,23 @@ enum ApiEndpoint {
         case .generateGiftSuggestions: return "gift-suggestions/generate"
         case .getGiftSuggestions: return "gift-suggestions"
         case .getBookmarkedSuggestions: return "gift-suggestions/bookmarked"
-        case .getPurchasedSuggestions: return "gift-suggestions/purchased"
         case .getSuggestionsByEvent(let eventId): return "gift-suggestions/events/\(eventId)"
         case .getSuggestionsByContact(let contactId): return "gift-suggestions/contacts/\(contactId)"
         case .rateSuggestion: return "gift-suggestions/rate"
         case .updateSuggestion: return "gift-suggestions/update"
         case .bookmarkSuggestion(let suggestionId): return "gift-suggestions/\(suggestionId)/bookmark"
         case .unbookmarkSuggestion(let suggestionId): return "gift-suggestions/\(suggestionId)/unbookmark"
-        case .markSuggestionAsPurchased(let suggestionId): return "gift-suggestions/\(suggestionId)/mark-purchased"
-        case .markSuggestionAsNotPurchased(let suggestionId): return "gift-suggestions/\(suggestionId)/mark-not-purchased"
-        case .saveToWishlist: return "gifts/wishlist"
         case .removeFromWishlist(let id): return "gifts/wishlist/\(id)"
         }
     }
 
     private var method: String {
         switch self {
-        case .authLogin, .authRegister, .authVerifyEmail, .authSendEmailVerification, .authLogout, .authForgotPassword, .authResetPassword, .appleAuth, .authSocialMobile, .createContact, .createEvent, .createGift, .generateGiftSuggestions, .rateSuggestion, .saveToWishlist:
+        case .authLogin, .authRegister, .authVerifyEmail, .authSendEmailVerification, .authLogout, .authForgotPassword, .authResetPassword, .appleAuth, .authSocialMobile, .createContact, .createEvent, .createGift, .generateGiftSuggestions, .rateSuggestion:
             return "POST"
-        case .listContacts, .listEvents, .listGifts, .getGiftSuggestions, .getBookmarkedSuggestions, .getPurchasedSuggestions, .getSuggestionsByEvent, .getSuggestionsByContact:
+        case .listContacts, .listEvents, .listGifts, .getGiftSuggestions, .getBookmarkedSuggestions, .getSuggestionsByEvent, .getSuggestionsByContact:
             return "GET"
-        case .updateContact, .updateEvent, .updateGift, .updateSuggestion, .bookmarkSuggestion, .unbookmarkSuggestion, .markSuggestionAsPurchased, .markSuggestionAsNotPurchased:
+        case .updateContact, .updateEvent, .updateGift, .updateSuggestion, .bookmarkSuggestion, .unbookmarkSuggestion:
             return "PATCH"
         case .deleteEvent, .deleteGift, .removeFromWishlist:
             return "DELETE"

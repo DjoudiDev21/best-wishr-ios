@@ -6,7 +6,6 @@ class GiftsPresenter: ObservableObject {
     private let generateGiftSuggestionsUseCase: GenerateGiftSuggestionsUseCase
     private let saveGiftToWishlistUseCase: SaveGiftToWishlistUseCase
     private let getSavedGiftsUseCase: GetSavedGiftsUseCase
-    private let markGiftAsPurchasedUseCase: MarkGiftAsPurchasedUseCase
     
     @Published var suggestions: [Gift] = []
     @Published var wishlistedGifts: [Gift] = []
@@ -19,12 +18,10 @@ class GiftsPresenter: ObservableObject {
         generateGiftSuggestionsUseCase: GenerateGiftSuggestionsUseCase,
         saveGiftToWishlistUseCase: SaveGiftToWishlistUseCase,
         getSavedGiftsUseCase: GetSavedGiftsUseCase,
-        markGiftAsPurchasedUseCase: MarkGiftAsPurchasedUseCase
     ) {
         self.generateGiftSuggestionsUseCase = generateGiftSuggestionsUseCase
         self.saveGiftToWishlistUseCase = saveGiftToWishlistUseCase
         self.getSavedGiftsUseCase = getSavedGiftsUseCase
-        self.markGiftAsPurchasedUseCase = markGiftAsPurchasedUseCase
     }
     
     // MARK: - Gift Suggestions
@@ -72,28 +69,6 @@ class GiftsPresenter: ObservableObject {
             }
         } catch {
             self.error = "Failed to save gift to wishlist: \(error.localizedDescription)"
-        }
-    }
-    
-    func togglePurchased(giftId: String) async {
-        do {
-            let updatedGift = try await markGiftAsPurchasedUseCase.execute(giftId: giftId)
-            
-            // Update local state
-            if let index = wishlistedGifts.firstIndex(where: { $0.id == giftId }) {
-                wishlistedGifts[index] = updatedGift
-            }
-            
-            // Manage purchased list
-            if updatedGift.isPurchased {
-                if !purchasedGifts.contains(where: { $0.id == giftId }) {
-                    purchasedGifts.append(updatedGift)
-                }
-            } else {
-                purchasedGifts.removeAll { $0.id == giftId }
-            }
-        } catch {
-            self.error = "Failed to update gift status: \(error.localizedDescription)"
         }
     }
     

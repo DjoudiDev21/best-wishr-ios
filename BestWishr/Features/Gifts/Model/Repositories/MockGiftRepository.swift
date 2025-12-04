@@ -50,36 +50,6 @@ class MockGiftRepository: GiftRepositoryProtocol {
         return wishlistedGifts
     }
     
-    func togglePurchased(giftId: String) async throws -> Gift {
-        try await Task.sleep(nanoseconds: 400_000_000)
-        
-        guard let index = wishlistedGifts.firstIndex(where: { $0.id == giftId }) else {
-            throw NSError(domain: "GiftRepository", code: 404, userInfo: [NSLocalizedDescriptionKey: "Gift not found"])
-        }
-        
-        let gift = wishlistedGifts[index]
-        let updatedGift = Gift(
-            id: gift.id,
-            title: gift.title,
-            description: gift.description,
-            price: gift.price,
-            currency: gift.currency,
-            category: gift.category,
-            tags: gift.tags,
-            url: gift.url,
-            imageURL: gift.imageURL,
-            isWishlisted: gift.isWishlisted,
-            isPurchased: !gift.isPurchased,
-            contactId: gift.contactId,
-            eventId: gift.eventId,
-            notes: gift.notes,
-            createdAt: gift.createdAt,
-            updatedAt: Date()
-        )
-        
-        wishlistedGifts[index] = updatedGift
-        return updatedGift
-    }
 }
 
 // MARK: - Private Helper Methods

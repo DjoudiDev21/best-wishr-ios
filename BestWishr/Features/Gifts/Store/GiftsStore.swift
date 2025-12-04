@@ -70,10 +70,6 @@ class GiftsStore: ObservableObject {
         await presenter.saveToWishlist(gift)
     }
     
-    func togglePurchased(giftId: String) async {
-        await presenter.togglePurchased(giftId: giftId)
-    }
-    
     // MARK: - Helper Methods
     
     func clearSuggestions() {

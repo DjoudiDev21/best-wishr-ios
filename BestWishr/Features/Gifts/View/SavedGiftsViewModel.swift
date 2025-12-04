@@ -60,10 +60,6 @@ final class SavedGiftsViewModel: ObservableObject {
         await giftsStore.loadWishlistedGifts()
     }
     
-    func togglePurchased(giftId: String) async {
-        await giftsStore.togglePurchased(giftId: giftId)
-    }
-    
     func clearError() {
         giftsStore.clearError()
     }

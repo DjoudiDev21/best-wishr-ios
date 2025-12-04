@@ -74,12 +74,10 @@ final class AppStore: ObservableObject {
         let generateGiftSuggestionsUseCase = GenerateGiftSuggestionsUseCase(repository: giftsRepository)
         let saveGiftToWishlistUseCase = SaveGiftToWishlistUseCase(repository: giftsRepository)
         let getSavedGiftsUseCase = GetSavedGiftsUseCase(repository: giftsRepository)
-        let markGiftAsPurchasedUseCase = MarkGiftAsPurchasedUseCase(repository: giftsRepository)
         let giftsPresenter = GiftsPresenter(
             generateGiftSuggestionsUseCase: generateGiftSuggestionsUseCase,
             saveGiftToWishlistUseCase: saveGiftToWishlistUseCase,
             getSavedGiftsUseCase: getSavedGiftsUseCase,
-            markGiftAsPurchasedUseCase: markGiftAsPurchasedUseCase
         )
         self.giftsStore = GiftsStore(presenter: giftsPresenter)
         

@@ -20,9 +20,8 @@ final class HttpGiftRepository: GiftRepositoryProtocol {
     
     // MARK: - Wishlist Management
     func saveToWishlist(_ gift: Gift) async throws -> Gift {
-        let request = WishlistRequest(giftId: gift.id, action: .add)
-        let response: Gift = try await httpClient.post(.saveToWishlist, body: request)
-        return response
+        let response: PublicGiftSuggestion = try await httpClient.patch(.bookmarkSuggestion(gift.id), body: EmptyBody())
+        return response.toGift()
     }
     
     func getWishlistedGifts() async throws -> [Gift] {
@@ -30,11 +29,6 @@ final class HttpGiftRepository: GiftRepositoryProtocol {
         return response.suggestions.map { $0.toGift() }
     }
     
-    func togglePurchased(giftId: String) async throws -> Gift {
-        // Since we can't toggle, let's mark as purchased
-        let response: Gift = try await httpClient.patch(.markSuggestionAsPurchased(giftId), body: EmptyBody())
-        return response
-    }
 }
 
 // MARK: - Request DTOs

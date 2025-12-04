@@ -7,5 +7,4 @@ protocol GiftRepositoryProtocol {
     // Wishlist management
     func saveToWishlist(_ gift: Gift) async throws -> Gift
     func getWishlistedGifts() async throws -> [Gift]
-    func togglePurchased(giftId: String) async throws -> Gift
 }

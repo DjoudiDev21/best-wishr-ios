@@ -55,10 +55,6 @@ final class GiftSuggestionsViewModel: ObservableObject {
     }
     
     func saveToWishlist(_ gift: Gift) async {
-        do {
-            print("save to whishlist")
-        } catch {
-            self.error = "Failed to save gift: \(error.localizedDescription)"
-        }
+        await giftsStore.saveToWishlist(gift)
     }
 }
